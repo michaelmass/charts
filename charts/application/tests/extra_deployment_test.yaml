@@ -1,0 +1,27 @@
+suite: test adding extra deployment
+templates:
+  - extra-list.yaml
+tests:
+  - it: should work
+    set:
+      extra:
+        - |
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: my-chart
+          spec:
+            template:
+              spec:
+                containers:
+                  - name: my-chart
+                    image: nginx:latest
+    asserts:
+      - isKind:
+          of: Deployment
+      - matchRegex:
+          path: metadata.name
+          pattern: my-chart$
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: nginx:latest
