@@ -1,0 +1,35 @@
+suite: test extra list
+templates:
+  - extra-list.yaml
+tests:
+  - it: should work
+    set:
+      extra:
+        - |
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: my-chart
+            namespace: bar
+          spec:
+            template:
+              spec:
+                containers:
+                  - name: my-chart
+                    image: nginx:latest
+    asserts:
+      - isKind:
+          of: Deployment
+      - matchRegex:
+          path: metadata.name
+          pattern: my-chart$
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: nginx:latest
+      - containsDocument:
+          kind: Deployment
+          apiVersion: apps/v1
+          name: my-chart
+          namespace: bar
+      - hasDocuments:
+          count: 1

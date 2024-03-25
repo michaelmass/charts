@@ -1,0 +1,11 @@
+suite: test daemonset
+templates:
+  - 'daemonset.yaml'
+tests:
+  - it: should fail with not implemented yet
+    set:
+      daemonset:
+        enabled: true
+    asserts:
+      - failedTemplate:
+          errorMessage: 'not implemented yet'

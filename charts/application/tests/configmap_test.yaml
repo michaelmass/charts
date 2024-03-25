@@ -1,0 +1,11 @@
+suite: test configmap
+templates:
+  - 'configmap.yaml'
+tests:
+  - it: should fail with not implemented yet
+    set:
+      configmap:
+        enabled: true
+    asserts:
+      - failedTemplate:
+          errorMessage: 'not implemented yet'

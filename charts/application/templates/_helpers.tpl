@@ -1,0 +1,2 @@
+{{- define "pod.template" }}
+{{- end }}

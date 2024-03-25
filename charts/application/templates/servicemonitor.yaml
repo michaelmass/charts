@@ -1,0 +1,3 @@
+{{- if .Values.servicemonitor.enabled }}
+{{- fail "not implemented yet" }}
+{{- end }}

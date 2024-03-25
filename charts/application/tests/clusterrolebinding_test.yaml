@@ -1,0 +1,12 @@
+suite: test clusterrolebinding
+templates:
+  - clusterrolebinding.yaml
+tests:
+  - it: should fail with not implemented yet
+    template: clusterrolebinding.yaml
+    set:
+      rbac:
+        enabled: true
+    asserts:
+      - failedTemplate:
+          errorMessage: 'not implemented yet'

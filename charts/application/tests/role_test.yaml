@@ -1,0 +1,12 @@
+suite: test role
+templates:
+  - role.yaml
+tests:
+  - it: should fail with not implemented yet
+    template: role.yaml
+    set:
+      rbac:
+        enabled: true
+    asserts:
+      - failedTemplate:
+          errorMessage: 'not implemented yet'

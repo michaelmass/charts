@@ -1,0 +1,9 @@
+suite: test installing all resources
+templates:
+  - '*.yaml'
+tests:
+  - it: should be empty
+    set: {}
+    asserts:
+      - hasDocuments:
+          count: 0
