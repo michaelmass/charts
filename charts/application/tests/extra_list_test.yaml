@@ -2,6 +2,11 @@ suite: test adding extra deployment
 templates:
   - extra-list.yaml
 tests:
+  - it: should be empty
+    set: {}
+    asserts:
+      - hasDocuments:
+          count: 0
   - it: should work
     set:
       extra:
@@ -10,6 +15,7 @@ tests:
           kind: Deployment
           metadata:
             name: my-chart
+            namespace: bar
           spec:
             template:
               spec:
@@ -25,3 +31,10 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].image
           value: nginx:latest
+      - containsDocument:
+          kind: Deployment
+          apiVersion: apps/v1
+          name: my-chart
+          namespace: bar
+      - hasDocuments:
+          count: 1

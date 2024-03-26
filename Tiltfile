@@ -16,5 +16,6 @@ local_resource(
   name='helm-test',
   cmd='helm unittest .',
   dir='charts/application',
-  deps=['app-test'],
+  resource_deps=['app-test'],
+  deps=['./charts/application/tests'],
 )

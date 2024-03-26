@@ -1,0 +1,57 @@
+suite: test creating a simple deployment
+templates:
+  - deployment.yaml
+tests:
+  - it: should be empty
+    set: {}
+    asserts:
+      - hasDocuments:
+          count: 0
+  - it: manifest should match snapshot
+    set:
+      deployment:
+        enabled: true
+    asserts:
+      - matchSnapshot: {}
+
+  - it: labels & annotations should be set
+    set:
+      common:
+        labels:
+          test_common: test
+        annotations:
+          test_common: test
+      deployment:
+        enabled: true
+        labels:
+          test_deployment: bar
+        annotations:
+          test_deployment: bar
+      pod:
+        labels:
+          test_pod: foo
+        annotations:
+          test_pod: foo
+    asserts:
+      - isKind:
+          of: Deployment
+      - isSubset:
+          path: metadata.labels
+          content:
+            test_common: test
+            test_deployment: bar
+      - isSubset:
+          path: metadata.annotations
+          content:
+            test_common: test
+            test_deployment: bar
+      - isSubset:
+          path: spec.template.metadata.labels
+          content:
+            test_common: test
+            test_pod: foo
+      - isSubset:
+          path: spec.template.metadata.annotations
+          content:
+            test_common: test
+            test_pod: foo
