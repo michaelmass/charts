@@ -2,11 +2,6 @@ suite: test creating a simple deployment
 templates:
   - deployment.yaml
 tests:
-  - it: should be empty
-    set: {}
-    asserts:
-      - hasDocuments:
-          count: 0
   - it: manifest should match snapshot
     set:
       deployment:

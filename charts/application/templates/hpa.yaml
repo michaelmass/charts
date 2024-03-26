@@ -1,0 +1,3 @@
+{{- if .Values.hpa.enabled }}
+{{- fail "not implemented yet" }}
+{{- end }}

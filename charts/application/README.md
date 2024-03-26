@@ -11,6 +11,19 @@ helm repo update
 helm install my-application michaelmass/application --namespace test
 ```
 
+## Testing
+
+[unittest](https://github.com/helm-unittest) is used to test the chart. To run the tests:
+
+```bash
+helm plugin install https://github.com/helm-unittest/helm-unittest.git
+helm unittest .
+```
+
+See the [unittest documentation](https://github.com/helm-unittest/helm-unittest/blob/main/DOCUMENT.md) for more information.
+
+More examples are available under the [unittest examples](https://github.com/helm-unittest/helm-unittest/tree/main/test/data).
+
 ## Credits
 
 This chart was inspired by:

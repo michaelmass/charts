@@ -1,0 +1,11 @@
+suite: test installing all resources
+templates:
+  - 'vpa.yaml'
+tests:
+  - it: should be empty
+    set:
+      vpa:
+        enabled: true
+    asserts:
+      - failedTemplate:
+          errorMessage: 'not implemented yet'

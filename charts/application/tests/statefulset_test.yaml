@@ -1,0 +1,11 @@
+suite: test installing all resources
+templates:
+  - 'statefulset.yaml'
+tests:
+  - it: should be empty
+    set:
+      statefulset:
+        enabled: true
+    asserts:
+      - failedTemplate:
+          errorMessage: 'not implemented yet'

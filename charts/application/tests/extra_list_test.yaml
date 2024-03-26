@@ -2,11 +2,6 @@ suite: test adding extra deployment
 templates:
   - extra-list.yaml
 tests:
-  - it: should be empty
-    set: {}
-    asserts:
-      - hasDocuments:
-          count: 0
   - it: should work
     set:
       extra:

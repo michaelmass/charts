@@ -93,11 +93,6 @@ pod:
   extraVolumes: []
   extraVolumeMounts: []
 
-  disruptionBudget:
-    enabled: false
-    minAvailable: 1
-    maxUnavailable: ''
-
   affinity: {}
   affinityPreset: ''
   antiAffinityPreset: soft
@@ -174,7 +169,7 @@ ingress:
   ingressClassName: ''
   extraRules: []
 
-serviceAccount:
+serviceaccount:
   enabled: false
   name: ''
   automountServiceAccountToken: false
@@ -184,5 +179,40 @@ serviceAccount:
 rbac:
   enabled: false
   rules: []
+
+vpa:
+  enabled: false
+
+statefulset:
+  enabled: false
+
+servicemonitor:
+  enabled: false
+
+secret:
+  enabled: false
+
+pvc:
+  enabled: false
+
+pdb:
+  enabled: false
+  minAvailable: 1
+  maxUnavailable: ''
+
+networkpolicy:
+  enabled: false
+
+hpa:
+  enabled: false
+
+daemonset:
+  enabled: false
+
+configmap:
+  enabled: false
+
+certificate:
+  enabled: false
 
 extra: []
