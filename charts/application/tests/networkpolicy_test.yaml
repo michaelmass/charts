@@ -1,10 +1,10 @@
-suite: test statefulset
+suite: test networkpolicy
 templates:
-  - 'statefulset.yaml'
+  - 'networkpolicy.yaml'
 tests:
   - it: should fail with not implemented yet
     set:
-      statefulset:
+      networkpolicy:
         enabled: true
     asserts:
       - failedTemplate:

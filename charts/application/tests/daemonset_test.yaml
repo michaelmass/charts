@@ -1,10 +1,10 @@
-suite: test statefulset
+suite: test daemonset
 templates:
-  - 'statefulset.yaml'
+  - 'daemonset.yaml'
 tests:
   - it: should fail with not implemented yet
     set:
-      statefulset:
+      daemonset:
         enabled: true
     asserts:
       - failedTemplate:

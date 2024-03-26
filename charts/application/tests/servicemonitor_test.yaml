@@ -1,10 +1,10 @@
-suite: test statefulset
+suite: test servicemonitor
 templates:
-  - 'statefulset.yaml'
+  - 'servicemonitor.yaml'
 tests:
   - it: should fail with not implemented yet
     set:
-      statefulset:
+      servicemonitor:
         enabled: true
     asserts:
       - failedTemplate:

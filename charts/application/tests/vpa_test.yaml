@@ -1,8 +1,8 @@
-suite: test installing all resources
+suite: test vpa
 templates:
   - 'vpa.yaml'
 tests:
-  - it: should be empty
+  - it: should fail with not implemented yet
     set:
       vpa:
         enabled: true

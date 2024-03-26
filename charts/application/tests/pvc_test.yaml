@@ -1,10 +1,10 @@
-suite: test statefulset
+suite: test pvc
 templates:
-  - 'statefulset.yaml'
+  - 'pvc.yaml'
 tests:
   - it: should fail with not implemented yet
     set:
-      statefulset:
+      pvc:
         enabled: true
     asserts:
       - failedTemplate:

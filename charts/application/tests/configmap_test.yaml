@@ -1,10 +1,10 @@
-suite: test statefulset
+suite: test configmap
 templates:
-  - 'statefulset.yaml'
+  - 'configmap.yaml'
 tests:
   - it: should fail with not implemented yet
     set:
-      statefulset:
+      configmap:
         enabled: true
     asserts:
       - failedTemplate:

@@ -1,4 +1,4 @@
-suite: test creating a simple deployment
+suite: test deployment
 templates:
   - deployment.yaml
 tests:

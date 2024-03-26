@@ -1,10 +1,11 @@
-suite: test statefulset
+suite: test role
 templates:
-  - 'statefulset.yaml'
+  - role.yaml
 tests:
   - it: should fail with not implemented yet
+    template: role.yaml
     set:
-      statefulset:
+      rbac:
         enabled: true
     asserts:
       - failedTemplate:

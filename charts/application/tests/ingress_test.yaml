@@ -1,10 +1,10 @@
-suite: test statefulset
+suite: test ingress
 templates:
-  - 'statefulset.yaml'
+  - 'ingress.yaml'
 tests:
   - it: should fail with not implemented yet
     set:
-      statefulset:
+      ingress:
         enabled: true
     asserts:
       - failedTemplate:

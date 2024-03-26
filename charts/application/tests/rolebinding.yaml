@@ -1,10 +1,11 @@
-suite: test statefulset
+suite: test rolebinding
 templates:
-  - 'statefulset.yaml'
+  - rolebinding.yaml
 tests:
   - it: should fail with not implemented yet
+    template: rolebinding.yaml
     set:
-      statefulset:
+      rbac:
         enabled: true
     asserts:
       - failedTemplate:

@@ -1,4 +1,4 @@
-suite: test adding extra deployment
+suite: test extra list
 templates:
   - extra-list.yaml
 tests:
