@@ -19,9 +19,8 @@ pod:
   priorityClassName: ""
   schedulerName: ""
   terminationGracePeriodSeconds: 0
-  containerPorts:
-    http: 80
-    https: 443
+  command: []
+  args: []
   env:
     vars: []
     configmap: ""
@@ -57,13 +56,17 @@ pod:
       httpGet:
         path: /
         port: http
-  image: {}
+  image:
+    registry: docker.io
+    repository: ""
+    tag: ""
+    digest: ""
+    pullPolicy: IfNotPresent
+    pullSecrets: []
   resourcesPreset: none
   resources: {}
   initContainers: []
   sidecars: []
-  extraVolumes: []
-  extraVolumeMounts: []
   affinity: {}
   affinityPreset: ""
   antiAffinityPreset: soft

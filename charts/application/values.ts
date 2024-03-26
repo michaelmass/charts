@@ -110,10 +110,13 @@ const podSchema = z.object({
   schedulerName: z.string().default(''),
   terminationGracePeriodSeconds: z.number().default(0),
 
+  command: z.string().array().default([]),
+  args: z.string().array().default([]),
+
   containerPorts: z.object({
-    http: z.number().default(80),
-    https: z.number().default(443),
-  }).default({}),
+    http: z.number().optional().default(80),
+    https: z.number().optional(),
+  }).optional(),
 
   env: z.object({
     vars: z.object({
@@ -130,13 +133,19 @@ const podSchema = z.object({
     readiness: probeSchema.default({}),
   }).default({}),
 
-  image: z.object({}).default({}), // TODO add the complete definition
+  image: z.object({
+    registry: z.string().default('docker.io'),
+    repository: z.string().default(''),
+    tag: z.string().default(''),
+    digest: z.string().default(''),
+    pullPolicy: z.string().default('IfNotPresent'), // TODO use an enum
+    pullSecrets: z.string().array().default([]),
+  }).default({}),
+
   resourcesPreset: z.enum(['none']).default('none'), // TODO add the complete definition
   resources: z.object({}).default({}), // TODO add the complete definition
   initContainers: z.object({}).array().default([]), // TODO add the complete definition
   sidecars: z.object({}).array().default([]), // TODO add the complete definition
-  extraVolumes: z.object({}).array().default([]), // TODO add the complete definition
-  extraVolumeMounts: z.object({}).array().default([]), // TODO add the complete definition
   affinity: z.object({}).default({}), // TODO add the complete definition
 
   affinityPreset: z.enum(['', 'soft', 'hard']).default(''),
@@ -191,7 +200,10 @@ const valuesSchema = z.object({
   nameOverride: z.string().default(''),
   fullnameOverride: z.string().default(''),
   namespaceOverride: z.string().default(''),
-  common: z.object({}).merge(labelsAndAnnotationsSchema).default({}),
+  common: z.object({
+    exampleValue: z.literal('common-chart').optional(),
+    global: globalSchema.optional(),
+  }).merge(labelsAndAnnotationsSchema).default({}),
   deployment: deploymentSchema,
   pod: podSchema,
   service: serviceSchema,

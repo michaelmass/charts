@@ -5,11 +5,23 @@ allow_k8s_contexts('local')
 
 namespace_create(name='test')
 
+values = {
+  'deployment.enabled': 'true',
+  'pod.image.repository': 'michaelmass/hellomicro',
+}
+
+flags = []
+
+for key, value in values.items():
+  flags.append('--set')
+  flags.append('%s=%s' % (key, value))
+
 helm_resource(
   name='app-test',
   namespace='test',
   chart='charts/application',
   pod_readiness='ignore',
+  flags=flags,
 )
 
 local_resource(
@@ -17,7 +29,7 @@ local_resource(
   cmd='helm unittest .',
   dir='charts/application',
   resource_deps=['app-test'],
-  deps=['./charts/application/tests'],
+  deps=['./charts/application/tests', './charts/application/templates'],
 )
 
 local_resource(
