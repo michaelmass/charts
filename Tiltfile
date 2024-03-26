@@ -19,3 +19,9 @@ local_resource(
   resource_deps=['app-test'],
   deps=['./charts/application/tests'],
 )
+
+local_resource(
+  name='gen-values',
+  serve_dir='charts/application',
+  serve_cmd='deno run --watch -A values.ts',
+)

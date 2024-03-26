@@ -1,125 +1,85 @@
 global:
-  imageRegistry: ''
+  imageRegistry: ""
+  storageClass: ""
   imagePullSecrets: []
-  storageClass: ''
-
-nameOverride: ''
-fullnameOverride: ''
-namespaceOverride: ''
-
+nameOverride: ""
+fullnameOverride: ""
+namespaceOverride: ""
 common:
   labels: {}
   annotations: {}
-
 deployment:
-  enabled: false
   replicas: 1
-
+  strategy:
+    type: RollingUpdate
+  enabled: false
   labels: {}
   annotations: {}
-
-  image:
-    registry: docker.io
-    repository: ''
-    tag: ''
-    digest: ''
-    pullPolicy: IfNotPresent
-    pullSecrets: []
-    command: []
-    args: []
-
+pod:
+  priorityClassName: ""
+  schedulerName: ""
+  terminationGracePeriodSeconds: 0
   containerPorts:
     http: 80
     https: 443
-
-  resourcesPreset: 'none'
+  env:
+    vars: []
+    configmap: ""
+    secret: ""
+  probes:
+    startup:
+      enabled: false
+      initialDelaySeconds: 30
+      timeoutSeconds: 30
+      periodSeconds: 10
+      successThreshold: 1
+      failureThreshold: 6
+      httpGet:
+        path: /
+        port: http
+    liveness:
+      enabled: true
+      initialDelaySeconds: 30
+      timeoutSeconds: 30
+      periodSeconds: 10
+      successThreshold: 1
+      failureThreshold: 6
+      httpGet:
+        path: /
+        port: http
+    readiness:
+      enabled: true
+      initialDelaySeconds: 30
+      timeoutSeconds: 30
+      periodSeconds: 10
+      successThreshold: 1
+      failureThreshold: 6
+      httpGet:
+        path: /
+        port: http
+  image: {}
+  resourcesPreset: none
   resources: {}
-
-  strategy:
-    type: RollingUpdate
-
   initContainers: []
-
   sidecars: []
-
-  extraEnvVars: []
-  extraEnvVarsCM: ''
-  extraEnvVarsSecret: ''
-
-  autoscaling:
-    enabled: false
-    minReplicas: ''
-    maxReplicas: ''
-    targetCPU: ''
-    targetMemory: ''
-
-  startupProbe:
-    enabled: false
-    initialDelaySeconds: 30
-    timeoutSeconds: 30
-    periodSeconds: 10
-    successThreshold: 1
-    failureThreshold: 6
-    httpGet:
-      path: /
-      port: http
-
-  livenessProbe:
-    enabled: true
-    initialDelaySeconds: 30
-    timeoutSeconds: 30
-    periodSeconds: 10
-    successThreshold: 1
-    failureThreshold: 6
-    httpGet:
-      path: /
-      port: http
-
-  readinessProbe:
-    enabled: true
-    initialDelaySeconds: 30
-    timeoutSeconds: 30
-    periodSeconds: 10
-    successThreshold: 1
-    failureThreshold: 6
-    httpGet:
-      path: /
-      port: http
-
-pod:
-  labels: {}
-  annotations: {}
-
   extraVolumes: []
   extraVolumeMounts: []
-
   affinity: {}
-  affinityPreset: ''
+  affinityPreset: ""
   antiAffinityPreset: soft
   nodeAffinityPreset:
-    type: ''
-    key: ''
+    type: ""
+    key: ""
     values: []
-
-  priorityClassName: ''
-
-  schedulerName: ''
-
   nodeSelector: {}
-
   tolerations: []
-
   topologySpreadConstraints: []
-
-  terminationGracePeriodSeconds: 30
-
   securityContext:
     enabled: true
     fsGroupChangePolicy: Always
     sysctls: []
     supplementalGroups: []
     fsGroup: 1001
-
   containerSecurityContext:
     enabled: true
     seLinuxOptions: null
@@ -129,90 +89,97 @@ pod:
     readOnlyRootFilesystem: false
     allowPrivilegeEscalation: false
     capabilities:
-      drop: ['ALL']
+      drop:
+        - ALL
+      add: []
     seccompProfile:
-      type: 'RuntimeDefault'
-
+      type: RuntimeDefault
+  labels: {}
+  annotations: {}
 service:
-  enabled: false
   type: ClusterIP
   ports:
     http: 80
     https: 443
   nodePorts:
-    http: ''
-    https: ''
-  clusterIP: ''
-  loadBalancerIP: ''
-  loadBalancerSourceRanges: []
+    http: ""
+    https: ""
+  clusterIP: ""
+  loadBalancerIP: ""
   externalTrafficPolicy: Cluster
-  extraPorts: []
-  annotations: {}
-  labels: {}
   sessionAffinity: None
+  loadBalancerSourceRanges: []
+  extraPorts: []
   sessionAffinityConfig: {}
-
-ingress:
   enabled: false
-  apiVersion: ''
+  labels: {}
+  annotations: {}
+ingress:
+  apiVersion: ""
   hostname: application.local
   pathType: ImplementationSpecific
   path: /
-  extraPaths: []
-  annotations: {}
-  labels: {}
   tls: false
+  existingSecretName: ""
+  ingressClassName: ""
+  extraPaths: []
   extraHosts: []
   extraTls: []
-  secrets: []
-  existingSecretName: ''
-  ingressClassName: ''
-  extraRules: []
-
-serviceaccount:
   enabled: false
-  name: ''
-  automountServiceAccountToken: false
-  annotations: {}
   labels: {}
-
+  annotations: {}
+serviceaccount:
+  name: ""
+  automountServiceAccountToken: false
+  enabled: false
+  labels: {}
+  annotations: {}
 rbac:
   enabled: false
-  rules: []
-
 vpa:
   enabled: false
-
+  labels: {}
+  annotations: {}
 statefulset:
   enabled: false
-
+  labels: {}
+  annotations: {}
 servicemonitor:
   enabled: false
-
+  labels: {}
+  annotations: {}
 secret:
   enabled: false
-
+  labels: {}
+  annotations: {}
 pvc:
   enabled: false
-
+  labels: {}
+  annotations: {}
 pdb:
-  enabled: false
   minAvailable: 1
-  maxUnavailable: ''
-
+  maxUnavailable: ""
+  enabled: false
+  labels: {}
+  annotations: {}
 networkpolicy:
   enabled: false
-
+  labels: {}
+  annotations: {}
 hpa:
   enabled: false
-
+  labels: {}
+  annotations: {}
 daemonset:
   enabled: false
-
+  labels: {}
+  annotations: {}
 configmap:
   enabled: false
-
+  labels: {}
+  annotations: {}
 certificate:
   enabled: false
-
+  labels: {}
+  annotations: {}
 extra: []
