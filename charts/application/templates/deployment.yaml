@@ -90,17 +90,13 @@ spec:
           {{- if .Values.pod.resources }}
           resources: {{- toYaml .Values.pod.resources | nindent 12 }}
           {{- end }}
-          {{- if .Values.pod.containerPorts }}
           ports:
-            {{- if .Values.pod.containerPorts.http }}
             - name: http
               containerPort: {{ .Values.pod.containerPorts.http }}
-            {{- end }}
             {{- if .Values.pod.containerPorts.https }}
             - name: https
               containerPort: {{ .Values.pod.containerPorts.https }}
             {{- end }}
-          {{- end }}
           {{- if .Values.pod.probes.liveness.enabled }}
           livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.pod.probes.liveness "enabled") "context" $) | nindent 12 }}
           {{- end }}

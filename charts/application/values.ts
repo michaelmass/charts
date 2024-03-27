@@ -116,7 +116,7 @@ const podSchema = z.object({
   containerPorts: z.object({
     http: z.number().optional().default(80),
     https: z.number().optional(),
-  }).optional(),
+  }).default({}),
 
   env: z.object({
     vars: z.object({

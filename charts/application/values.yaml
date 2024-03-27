@@ -21,6 +21,8 @@ pod:
   terminationGracePeriodSeconds: 0
   command: []
   args: []
+  containerPorts:
+    http: 80
   env:
     vars: []
     configmap: ""

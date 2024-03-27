@@ -147,7 +147,8 @@
               "type": "number"
             }
           },
-          "additionalProperties": false
+          "additionalProperties": false,
+          "default": {}
         },
         "env": {
           "type": "object",

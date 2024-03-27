@@ -6,6 +6,10 @@ tests:
     set:
       deployment:
         enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
     asserts:
       - matchSnapshot: {}
 
@@ -23,6 +27,9 @@ tests:
         annotations:
           test_deployment: bar
       pod:
+        image:
+          repository: example
+          tag: latest
         labels:
           test_pod: foo
         annotations:

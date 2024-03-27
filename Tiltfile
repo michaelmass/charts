@@ -8,6 +8,10 @@ namespace_create(name='test')
 values = {
   'deployment.enabled': 'true',
   'pod.image.repository': 'michaelmass/hellomicro',
+  'pod.image.tag': 'latest',
+  'pod.containerPorts.http': '8080',
+  'pod.probes.liveness.httpGet.path': '/v1/ping',
+  'pod.probes.readiness.httpGet.path': '/v1/ping',
 }
 
 flags = []
