@@ -1,0 +1,11 @@
+suite: test servicemonitor
+templates:
+  - 'servicemonitor.yaml'
+tests:
+  - it: should fail with not implemented yet
+    set:
+      servicemonitor:
+        enabled: true
+    asserts:
+      - failedTemplate:
+          errorMessage: 'not implemented yet'

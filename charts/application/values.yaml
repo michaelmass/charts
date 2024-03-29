@@ -1,0 +1,191 @@
+global:
+  imageRegistry: ""
+  storageClass: ""
+  imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+namespaceOverride: ""
+common:
+  labels: {}
+  annotations: {}
+deployment:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  enabled: false
+  labels: {}
+  annotations: {}
+pod:
+  priorityClassName: ""
+  schedulerName: ""
+  terminationGracePeriodSeconds: 0
+  command: []
+  args: []
+  containerPorts:
+    http: 80
+  env:
+    vars: []
+    configmap: ""
+    secret: ""
+  probes:
+    startup:
+      enabled: false
+      initialDelaySeconds: 30
+      timeoutSeconds: 30
+      periodSeconds: 10
+      successThreshold: 1
+      failureThreshold: 6
+      httpGet:
+        path: /
+        port: http
+    liveness:
+      enabled: true
+      initialDelaySeconds: 30
+      timeoutSeconds: 30
+      periodSeconds: 10
+      successThreshold: 1
+      failureThreshold: 6
+      httpGet:
+        path: /
+        port: http
+    readiness:
+      enabled: true
+      initialDelaySeconds: 30
+      timeoutSeconds: 30
+      periodSeconds: 10
+      successThreshold: 1
+      failureThreshold: 6
+      httpGet:
+        path: /
+        port: http
+  image:
+    registry: docker.io
+    repository: ""
+    tag: ""
+    digest: ""
+    pullPolicy: IfNotPresent
+    pullSecrets: []
+  resourcesPreset: none
+  resources: {}
+  initContainers: []
+  sidecars: []
+  affinity: {}
+  affinityPreset: ""
+  antiAffinityPreset: soft
+  nodeAffinityPreset:
+    type: ""
+    key: ""
+    values: []
+  nodeSelector: {}
+  tolerations: []
+  topologySpreadConstraints: []
+  securityContext:
+    enabled: true
+    fsGroupChangePolicy: Always
+    sysctls: []
+    supplementalGroups: []
+    fsGroup: 1001
+  containerSecurityContext:
+    enabled: true
+    seLinuxOptions: null
+    runAsUser: 1001
+    runAsNonRoot: true
+    privileged: false
+    readOnlyRootFilesystem: false
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+      add: []
+    seccompProfile:
+      type: RuntimeDefault
+  labels: {}
+  annotations: {}
+service:
+  type: ClusterIP
+  ports:
+    http: 80
+    https: 443
+  nodePorts:
+    http: ""
+    https: ""
+  protocol: TCP
+  clusterIP: ""
+  loadBalancerIP: ""
+  externalTrafficPolicy: Cluster
+  sessionAffinity: None
+  loadBalancerSourceRanges: []
+  extraPorts: []
+  sessionAffinityConfig: {}
+  enabled: false
+  labels: {}
+  annotations: {}
+ingress:
+  apiVersion: ""
+  hostname: application.local
+  pathType: ImplementationSpecific
+  path: /
+  tls: false
+  existingSecretName: ""
+  ingressClassName: ""
+  extraPaths: []
+  extraHosts: []
+  extraTls: []
+  enabled: false
+  labels: {}
+  annotations: {}
+serviceaccount:
+  name: ""
+  automountServiceAccountToken: false
+  enabled: false
+  labels: {}
+  annotations: {}
+rbac:
+  enabled: false
+vpa:
+  enabled: false
+  labels: {}
+  annotations: {}
+statefulset:
+  enabled: false
+  labels: {}
+  annotations: {}
+servicemonitor:
+  enabled: false
+  labels: {}
+  annotations: {}
+secret:
+  enabled: false
+  labels: {}
+  annotations: {}
+pvc:
+  enabled: false
+  labels: {}
+  annotations: {}
+pdb:
+  minAvailable: 1
+  maxUnavailable: ""
+  enabled: false
+  labels: {}
+  annotations: {}
+networkpolicy:
+  enabled: false
+  labels: {}
+  annotations: {}
+hpa:
+  enabled: false
+  labels: {}
+  annotations: {}
+daemonset:
+  enabled: false
+  labels: {}
+  annotations: {}
+configmap:
+  enabled: false
+  labels: {}
+  annotations: {}
+certificate:
+  enabled: false
+  labels: {}
+  annotations: {}
+extra: []

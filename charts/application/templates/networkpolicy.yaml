@@ -1,0 +1,3 @@
+{{- if .Values.networkpolicy.enabled }}
+{{- fail "not implemented yet" }}
+{{- end }}
