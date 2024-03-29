@@ -1,3 +1,2 @@
-{{- define "pod" }}
-
+{{- define "pod.template" }}
 {{- end }}
