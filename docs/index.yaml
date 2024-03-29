@@ -1,0 +1,28 @@
+apiVersion: v1
+entries:
+  application:
+  - apiVersion: v2
+    created: "2024-03-29T16:52:04.700918-04:00"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/bitnamicharts
+      tags:
+      - bitnami-common
+      version: 2.x.x
+    description: Generic helm chart for deploying applications
+    digest: 7f3a2b9b8ba9ef4b76cbf55291361f2e22597a9ae7ab89ff0ba6a0f3e5b05e89
+    keywords:
+    - app
+    - generic
+    - application
+    maintainers:
+    - name: Michael Masson
+      url: https://github.com/michaelmass/application-chart
+    name: application
+    sources:
+    - https://github.com/michaelmass/application-chart
+    type: application
+    urls:
+    - application-0.0.1.tgz
+    version: 0.0.1
+generated: "2024-03-29T16:52:04.699306-04:00"

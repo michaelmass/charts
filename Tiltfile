@@ -27,3 +27,15 @@ local_resource(
   serve_dir='charts/application',
   serve_cmd='deno run --watch -A values.ts',
 )
+
+local_resource(
+  name='gen-application-chart-package',
+  cmd='helm package ./charts/application -d docs',
+)
+
+local_resource(
+  name='gen-index-yaml',
+  dir='docs',
+  cmd='helm repo index .',
+  deps=['gen-application-chart-package'],
+)
