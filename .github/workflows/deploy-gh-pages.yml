@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: docs
       - uses: actions/deploy-pages@v4
