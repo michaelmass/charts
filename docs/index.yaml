@@ -2,7 +2,7 @@ apiVersion: v1
 entries:
   application:
   - apiVersion: v2
-    created: "2024-03-29T16:50:09.734633-04:00"
+    created: "2024-03-29T16:52:04.700918-04:00"
     dependencies:
     - name: common
       repository: oci://registry-1.docker.io/bitnamicharts
@@ -10,7 +10,7 @@ entries:
       - bitnami-common
       version: 2.x.x
     description: Generic helm chart for deploying applications
-    digest: 9d2a1d5524e6f004696428247ad34b055f58facd4ca96561fc98db374f7e1e26
+    digest: 7f3a2b9b8ba9ef4b76cbf55291361f2e22597a9ae7ab89ff0ba6a0f3e5b05e89
     keywords:
     - app
     - generic
@@ -25,4 +25,4 @@ entries:
     urls:
     - application-0.0.1.tgz
     version: 0.0.1
-generated: "2024-03-29T16:50:09.733337-04:00"
+generated: "2024-03-29T16:52:04.699306-04:00"
