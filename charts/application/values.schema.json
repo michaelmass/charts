@@ -585,6 +585,15 @@
           "additionalProperties": false,
           "default": {}
         },
+        "protocol": {
+          "type": "string",
+          "enum": [
+            "SCTP",
+            "TCP",
+            "UDP"
+          ],
+          "default": "TCP"
+        },
         "clusterIP": {
           "type": "string",
           "default": ""
@@ -619,8 +628,11 @@
               "protocol": {
                 "type": "string",
                 "enum": [
-                  "TCP"
-                ]
+                  "SCTP",
+                  "TCP",
+                  "UDP"
+                ],
+                "default": "TCP"
               },
               "port": {
                 "type": "number"
@@ -637,7 +649,6 @@
             },
             "required": [
               "name",
-              "protocol",
               "port",
               "nodePort",
               "targetPort"

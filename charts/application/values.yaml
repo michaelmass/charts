@@ -109,6 +109,7 @@ service:
   nodePorts:
     http: ""
     https: ""
+  protocol: TCP
   clusterIP: ""
   loadBalancerIP: ""
   externalTrafficPolicy: Cluster

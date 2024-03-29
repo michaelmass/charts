@@ -2,10 +2,35 @@ suite: test service
 templates:
   - 'service.yaml'
 tests:
-  - it: should fail with not implemented yet
+  - it: manifest should match snapshot
     set:
       service:
         enabled: true
     asserts:
-      - failedTemplate:
-          errorMessage: 'not implemented yet'
+      - matchSnapshot: {}
+  - it: labels & annotations should be set
+    set:
+      common:
+        labels:
+          test_common: test
+        annotations:
+          test_common: test
+      service:
+        enabled: true
+        labels:
+          test_service: bar
+        annotations:
+          test_service: bar
+    asserts:
+      - isKind:
+          of: Service
+      - isSubset:
+          path: metadata.labels
+          content:
+            test_common: test
+            test_service: bar
+      - isSubset:
+          path: metadata.annotations
+          content:
+            test_common: test
+            test_service: bar

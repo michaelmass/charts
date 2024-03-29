@@ -1,0 +1,21 @@
+# yaml-language-server: $schema=./charts/application/values.schema.json
+
+deployment:
+  enabled: true
+
+pod:
+  image:
+    repository: michaelmass/hellomicro
+    tag: latest
+  containerPorts:
+    http: 8080
+  probes:
+    liveness:
+      httpGet:
+        path: /v1/ping
+    readiness:
+      httpGet:
+        path: /v1/ping
+
+service:
+  enabled: true

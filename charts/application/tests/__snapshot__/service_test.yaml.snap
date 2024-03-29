@@ -1,0 +1,23 @@
+manifest should match snapshot:
+  1: |
+    apiVersion: v1
+    kind: Service
+    metadata:
+      labels:
+        app.kubernetes.io/instance: RELEASE-NAME
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: application
+        helm.sh/chart: application-0.0.1
+      name: RELEASE-NAME-application
+      namespace: NAMESPACE
+    spec:
+      ports:
+        - name: http
+          nodePort: null
+          port: 80
+          protocol: TCP
+      selector:
+        app.kubernetes.io/instance: RELEASE-NAME
+        app.kubernetes.io/name: application
+      sessionAffinity: None
+      type: ClusterIP

@@ -63,6 +63,7 @@ const serviceSchema = z.object({
     http: z.string().default(''),
     https: z.string().default(''),
   }).default({}),
+  protocol: z.enum(["SCTP", "TCP", "UDP"]).default('TCP'),
   clusterIP: z.string().default(''),
   loadBalancerIP: z.string().default(''),
   externalTrafficPolicy: z.string().default('Cluster'),
@@ -70,7 +71,7 @@ const serviceSchema = z.object({
   loadBalancerSourceRanges: z.string().array().default([]),
   extraPorts: z.object({
     name: z.string(),
-    protocol: z.enum(['TCP']),
+    protocol: z.enum(["SCTP", "TCP", "UDP"]).default('TCP'),
     port: z.number(),
     nodePort: z.number(),
     targetPort: z.union([

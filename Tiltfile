@@ -1,31 +1,17 @@
 load('ext://helm_resource', 'helm_resource', 'helm_repo')
 load('ext://namespace', 'namespace_create')
 
-allow_k8s_contexts('local')
+allow_k8s_contexts('kind-local')
 
 namespace_create(name='test')
-
-values = {
-  'deployment.enabled': 'true',
-  'pod.image.repository': 'michaelmass/hellomicro',
-  'pod.image.tag': 'latest',
-  'pod.containerPorts.http': '8080',
-  'pod.probes.liveness.httpGet.path': '/v1/ping',
-  'pod.probes.readiness.httpGet.path': '/v1/ping',
-}
-
-flags = []
-
-for key, value in values.items():
-  flags.append('--set')
-  flags.append('%s=%s' % (key, value))
 
 helm_resource(
   name='app-test',
   namespace='test',
   chart='charts/application',
   pod_readiness='ignore',
-  flags=flags,
+  flags=['--values', './values.test.yaml'],
+  deps=['./values.test.yaml', './charts/application/templates']
 )
 
 local_resource(
