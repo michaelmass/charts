@@ -19,3 +19,6 @@ pod:
 
 service:
   enabled: true
+
+ingress:
+  enabled: true
