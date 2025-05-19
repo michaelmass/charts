@@ -1,10 +1,10 @@
 global:
-  imageRegistry: ""
-  storageClass: ""
+  imageRegistry: ''
+  storageClass: ''
   imagePullSecrets: []
-nameOverride: ""
-fullnameOverride: ""
-namespaceOverride: ""
+nameOverride: ''
+fullnameOverride: ''
+namespaceOverride: ''
 common:
   labels: {}
   annotations: {}
@@ -16,17 +16,17 @@ deployment:
   labels: {}
   annotations: {}
 pod:
-  priorityClassName: ""
-  schedulerName: ""
+  priorityClassName: ''
+  schedulerName: ''
   terminationGracePeriodSeconds: 0
   command: []
   args: []
   containerPorts:
-    http: 80
+    http: 8080
   env:
     vars: []
-    configmap: ""
-    secret: ""
+    configmap: ''
+    secret: ''
   probes:
     startup:
       enabled: false
@@ -60,9 +60,9 @@ pod:
         port: http
   image:
     registry: docker.io
-    repository: ""
-    tag: ""
-    digest: ""
+    repository: ''
+    tag: ''
+    digest: ''
     pullPolicy: IfNotPresent
     pullSecrets: []
   resourcesPreset: none
@@ -70,11 +70,11 @@ pod:
   initContainers: []
   sidecars: []
   affinity: {}
-  affinityPreset: ""
+  affinityPreset: ''
   antiAffinityPreset: soft
   nodeAffinityPreset:
-    type: ""
-    key: ""
+    type: ''
+    key: ''
     values: []
   nodeSelector: {}
   tolerations: []
@@ -107,11 +107,11 @@ service:
     http: 80
     https: 443
   nodePorts:
-    http: ""
-    https: ""
+    http: ''
+    https: ''
   protocol: TCP
-  clusterIP: ""
-  loadBalancerIP: ""
+  clusterIP: ''
+  loadBalancerIP: ''
   externalTrafficPolicy: Cluster
   sessionAffinity: None
   loadBalancerSourceRanges: []
@@ -121,13 +121,13 @@ service:
   labels: {}
   annotations: {}
 ingress:
-  apiVersion: ""
+  apiVersion: ''
   hostname: application.local
   pathType: ImplementationSpecific
   path: /
   tls: false
-  existingSecretName: ""
-  ingressClassName: ""
+  existingSecretName: ''
+  ingressClassName: ''
   extraPaths: []
   extraHosts: []
   extraTls: []
@@ -135,7 +135,7 @@ ingress:
   labels: {}
   annotations: {}
 serviceaccount:
-  name: ""
+  name: ''
   automountServiceAccountToken: false
   enabled: false
   labels: {}
@@ -164,7 +164,7 @@ pvc:
   annotations: {}
 pdb:
   minAvailable: 1
-  maxUnavailable: ""
+  maxUnavailable: ''
   enabled: false
   labels: {}
   annotations: {}
