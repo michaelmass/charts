@@ -21,9 +21,7 @@
                 "type": "string"
               }
             },
-            "required": [
-              "name"
-            ],
+            "required": ["name"],
             "additionalProperties": false
           },
           "default": []
@@ -84,9 +82,7 @@
           "properties": {
             "type": {
               "type": "string",
-              "enum": [
-                "RollingUpdate"
-              ],
+              "enum": ["RollingUpdate"],
               "default": "RollingUpdate"
             }
           },
@@ -141,7 +137,7 @@
           "properties": {
             "http": {
               "type": "number",
-              "default": 80
+              "default": 8080
             },
             "https": {
               "type": "number"
@@ -165,10 +161,7 @@
                     "type": "string"
                   }
                 },
-                "required": [
-                  "name",
-                  "value"
-                ],
+                "required": ["name", "value"],
                 "additionalProperties": false
               },
               "default": []
@@ -284,9 +277,7 @@
         },
         "resourcesPreset": {
           "type": "string",
-          "enum": [
-            "none"
-          ],
+          "enum": ["none"],
           "default": "none"
         },
         "resources": {
@@ -321,20 +312,12 @@
         },
         "affinityPreset": {
           "type": "string",
-          "enum": [
-            "",
-            "soft",
-            "hard"
-          ],
+          "enum": ["", "soft", "hard"],
           "default": ""
         },
         "antiAffinityPreset": {
           "type": "string",
-          "enum": [
-            "",
-            "soft",
-            "hard"
-          ],
+          "enum": ["", "soft", "hard"],
           "default": "soft"
         },
         "nodeAffinityPreset": {
@@ -346,11 +329,7 @@
             },
             "key": {
               "type": "string",
-              "enum": [
-                "",
-                "soft",
-                "hard"
-              ],
+              "enum": ["", "soft", "hard"],
               "default": ""
             },
             "values": {
@@ -411,10 +390,7 @@
                     "type": "string"
                   }
                 },
-                "required": [
-                  "name",
-                  "value"
-                ],
+                "required": ["name", "value"],
                 "additionalProperties": false
               },
               "default": []
@@ -459,12 +435,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "level",
-                    "role",
-                    "type",
-                    "user"
-                  ],
+                  "required": ["level", "role", "type", "user"],
                   "additionalProperties": false
                 },
                 {
@@ -501,9 +472,7 @@
                   "items": {
                     "type": "string"
                   },
-                  "default": [
-                    "ALL"
-                  ]
+                  "default": ["ALL"]
                 },
                 "add": {
                   "type": "array",
@@ -549,10 +518,7 @@
       "properties": {
         "type": {
           "type": "string",
-          "enum": [
-            "ClusterIP",
-            "LoadBalancer"
-          ],
+          "enum": ["ClusterIP", "LoadBalancer"],
           "default": "ClusterIP"
         },
         "ports": {
@@ -587,11 +553,7 @@
         },
         "protocol": {
           "type": "string",
-          "enum": [
-            "SCTP",
-            "TCP",
-            "UDP"
-          ],
+          "enum": ["SCTP", "TCP", "UDP"],
           "default": "TCP"
         },
         "clusterIP": {
@@ -627,11 +589,7 @@
               },
               "protocol": {
                 "type": "string",
-                "enum": [
-                  "SCTP",
-                  "TCP",
-                  "UDP"
-                ],
+                "enum": ["SCTP", "TCP", "UDP"],
                 "default": "TCP"
               },
               "port": {
@@ -641,18 +599,10 @@
                 "type": "number"
               },
               "targetPort": {
-                "type": [
-                  "string",
-                  "number"
-                ]
+                "type": ["string", "number"]
               }
             },
-            "required": [
-              "name",
-              "port",
-              "nodePort",
-              "targetPort"
-            ],
+            "required": ["name", "port", "nodePort", "targetPort"],
             "additionalProperties": false
           },
           "default": []
@@ -746,9 +696,7 @@
                                 "type": "string"
                               }
                             },
-                            "required": [
-                              "name"
-                            ],
+                            "required": ["name"],
                             "additionalProperties": false
                           },
                           {
@@ -758,32 +706,21 @@
                                 "type": "number"
                               }
                             },
-                            "required": [
-                              "number"
-                            ],
+                            "required": ["number"],
                             "additionalProperties": false
                           }
                         ]
                       }
                     },
-                    "required": [
-                      "name",
-                      "port"
-                    ],
+                    "required": ["name", "port"],
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "service"
-                ],
+                "required": ["service"],
                 "additionalProperties": false
               }
             },
-            "required": [
-              "path",
-              "pathType",
-              "backend"
-            ],
+            "required": ["path", "pathType", "backend"],
             "additionalProperties": false
           },
           "default": []
@@ -803,11 +740,7 @@
                 "type": "string"
               }
             },
-            "required": [
-              "name",
-              "path",
-              "pathType"
-            ],
+            "required": ["name", "path", "pathType"],
             "additionalProperties": false
           },
           "default": []
@@ -827,10 +760,7 @@
                 "type": "string"
               }
             },
-            "required": [
-              "hosts",
-              "secretName"
-            ],
+            "required": ["hosts", "secretName"],
             "additionalProperties": false
           },
           "default": []
