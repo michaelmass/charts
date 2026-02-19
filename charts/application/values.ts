@@ -1,6 +1,5 @@
-import yaml from "npm:yaml";
-import { zodToJsonSchema } from "npm:zod-to-json-schema";
-import { z } from "https://deno.land/x/zod@v3.22.2/mod.ts";
+import yaml from "npm:yaml@2.8.2";
+import { z, toJSONSchema } from "npm:zod@4.3.6";
 
 const globalSchema = z.object({
 	imageRegistry: z.string().default(""),
@@ -14,15 +13,15 @@ const globalSchema = z.object({
 });
 
 const labelsAndAnnotationsSchema = z.object({
-	labels: z.record(z.string()).default({}),
-	annotations: z.record(z.string()).default({}),
+	labels: z.record(z.string(),z.string()).prefault({}),
+	annotations: z.record(z.string(), z.string()).prefault({}),
 });
 
 const commonResourceSchema = z
 	.object({
 		enabled: z.boolean().default(false),
 	})
-	.merge(labelsAndAnnotationsSchema);
+	.extend(labelsAndAnnotationsSchema.shape);
 
 const ingressBackendSchema = z.object({
 	service: z.object({
@@ -67,8 +66,8 @@ const ingressSchema = z
 			.array()
 			.default([]),
 	})
-	.merge(commonResourceSchema)
-	.default({});
+	.extend(commonResourceSchema.shape)
+	.prefault({})
 
 const serviceSchema = z
 	.object({
@@ -78,13 +77,13 @@ const serviceSchema = z
 				http: z.number().default(80),
 				https: z.number().default(443),
 			})
-			.default({}),
+			.prefault({}),
 		nodePorts: z
 			.object({
 				http: z.string().default(""),
 				https: z.string().default(""),
 			})
-			.default({}),
+			.prefault({}),
 		protocol: z.enum(["SCTP", "TCP", "UDP"]).default("TCP"),
 		clusterIP: z.string().default(""),
 		loadBalancerIP: z.string().default(""),
@@ -109,10 +108,10 @@ const serviceSchema = z
 					})
 					.optional(),
 			})
-			.default({}),
+			.prefault({}),
 	})
-	.merge(commonResourceSchema)
-	.default({});
+	.extend(commonResourceSchema.shape)
+	.prefault({});
 
 const deploymentSchema = z
 	.object({
@@ -121,10 +120,10 @@ const deploymentSchema = z
 			.object({
 				type: z.enum(["RollingUpdate"]).default("RollingUpdate"),
 			})
-			.default({}),
+			.prefault({}),
 	})
-	.merge(commonResourceSchema)
-	.default({});
+	.extend(commonResourceSchema.shape)
+	.prefault({});
 
 const probeSchema = z.object({
 	enabled: z.boolean().default(true),
@@ -138,7 +137,7 @@ const probeSchema = z.object({
 			path: z.string().default("/"),
 			port: z.string().default("http"),
 		})
-		.default({}),
+		.prefault({}),
 });
 
 const podSchema = z
@@ -155,7 +154,7 @@ const podSchema = z
 				http: z.number().optional().default(8080),
 				https: z.number().optional(),
 			})
-			.default({}),
+			.prefault({}),
 
 		env: z
 			.object({
@@ -169,15 +168,15 @@ const podSchema = z
 				configmap: z.string().default(""),
 				secret: z.string().default(""),
 			})
-			.default({}),
+			.prefault({}),
 
 		probes: z
 			.object({
-				startup: probeSchema.default({ enabled: false }),
-				liveness: probeSchema.default({}),
-				readiness: probeSchema.default({}),
+				startup: probeSchema.prefault({ enabled: false }),
+				liveness: probeSchema.prefault({}),
+				readiness: probeSchema.prefault({}),
 			})
-			.default({}),
+			.prefault({}),
 
 		image: z
 			.object({
@@ -188,13 +187,13 @@ const podSchema = z
 				pullPolicy: z.string().default("IfNotPresent"), // TODO use an enum
 				pullSecrets: z.string().array().default([]),
 			})
-			.default({}),
+			.prefault({}),
 
 		resourcesPreset: z.enum(["none"]).default("none"), // TODO add the complete definition
-		resources: z.object({}).default({}), // TODO add the complete definition
+		resources: z.object({}).prefault({}), // TODO add the complete definition
 		initContainers: z.object({}).array().default([]), // TODO add the complete definition
 		sidecars: z.object({}).array().default([]), // TODO add the complete definition
-		affinity: z.object({}).default({}), // TODO add the complete definition
+		affinity: z.object({}).prefault({}), // TODO add the complete definition
 
 		affinityPreset: z.enum(["", "soft", "hard"]).default(""),
 		antiAffinityPreset: z.enum(["", "soft", "hard"]).default("soft"),
@@ -204,9 +203,9 @@ const podSchema = z
 				key: z.enum(["", "soft", "hard"]).default(""),
 				values: z.string().array().default([]),
 			})
-			.default({}),
+			.prefault({}),
 
-		nodeSelector: z.object({}).default({}), // TODO add the complete definition
+		nodeSelector: z.object({}).prefault({}), // TODO add the complete definition
 		tolerations: z.object({}).array().default([]), // TODO add the complete definition
 		topologySpreadConstraints: z.object({}).array().default([]), // TODO add the complete definition
 
@@ -224,7 +223,7 @@ const podSchema = z
 				supplementalGroups: z.number().array().default([]),
 				fsGroup: z.number().default(1001),
 			})
-			.default({}),
+			.prefault({}),
 
 		containerSecurityContext: z
 			.object({
@@ -248,22 +247,22 @@ const podSchema = z
 						drop: z.string().array().default(["ALL"]),
 						add: z.string().array().default([]),
 					})
-					.default({}),
+					.prefault({}),
 				seccompProfile: z
 					.object({
 						type: z.string().default("RuntimeDefault"),
 						localhostProfile: z.string().optional(),
 					})
-					.default({}),
+					.prefault({}),
 			})
-			.default({}),
+			.prefault({}),
 	})
-	.merge(labelsAndAnnotationsSchema)
-	.default({});
+	.extend(labelsAndAnnotationsSchema.shape)
+	.prefault({});
 
 const valuesSchema = z
 	.object({
-		global: globalSchema.default({}),
+		global: globalSchema.prefault({}),
 		nameOverride: z.string().default(""),
 		fullnameOverride: z.string().default(""),
 		namespaceOverride: z.string().default(""),
@@ -272,8 +271,8 @@ const valuesSchema = z
 				exampleValue: z.literal("common-chart").optional(),
 				global: globalSchema.optional(),
 			})
-			.merge(labelsAndAnnotationsSchema)
-			.default({}),
+			.extend(labelsAndAnnotationsSchema.shape)
+			.prefault({}),
 		deployment: deploymentSchema,
 		pod: podSchema,
 		service: serviceSchema,
@@ -283,36 +282,35 @@ const valuesSchema = z
 				name: z.string().default(""),
 				automountServiceAccountToken: z.boolean().default(false),
 			})
-			.merge(commonResourceSchema)
-			.default({}),
+			.extend(commonResourceSchema.shape)
+			.prefault({}),
 		rbac: z
 			.object({
 				enabled: z.boolean().default(false),
 			})
-			.default({}),
-		vpa: z.object({}).merge(commonResourceSchema).default({}),
-		statefulset: z.object({}).merge(commonResourceSchema).default({}),
-		servicemonitor: z.object({}).merge(commonResourceSchema).default({}),
-		secret: z.object({}).merge(commonResourceSchema).default({}),
-		pvc: z.object({}).merge(commonResourceSchema).default({}),
+			.prefault({}),
+		vpa: z.object({}).extend(commonResourceSchema.shape).prefault({}),
+		statefulset: z.object({}).extend(commonResourceSchema.shape).prefault({}),
+		servicemonitor: z.object({}).extend(commonResourceSchema.shape).prefault({}),
+		secret: z.object({}).extend(commonResourceSchema.shape).prefault({}),
+		pvc: z.object({}).extend(commonResourceSchema.shape).prefault({}),
 		pdb: z
 			.object({
 				minAvailable: z.number().default(1),
 				maxUnavailable: z.string().default(""),
 			})
-			.merge(commonResourceSchema)
-			.default({}),
-		networkpolicy: z.object({}).merge(commonResourceSchema).default({}),
-		hpa: z.object({}).merge(commonResourceSchema).default({}),
-		daemonset: z.object({}).merge(commonResourceSchema).default({}),
-		configmap: z.object({}).merge(commonResourceSchema).default({}),
-		certificate: z.object({}).merge(commonResourceSchema).default({}),
+			.extend(commonResourceSchema.shape)
+			.prefault({}),
+		networkpolicy: z.object({}).extend(commonResourceSchema.shape).prefault({}),
+		hpa: z.object({}).extend(commonResourceSchema.shape).prefault({}),
+		daemonset: z.object({}).extend(commonResourceSchema.shape).prefault({}),
+		configmap: z.object({}).extend(commonResourceSchema.shape).prefault({}),
+		certificate: z.object({}).extend(commonResourceSchema.shape).prefault({}),
 		extra: z.string().array().default([]),
 	})
-	.default({});
+	.prefault({});
 
-// deno-lint-ignore no-explicit-any
-const jsonSchema = (zodToJsonSchema as any)(valuesSchema);
+const jsonSchema = toJSONSchema(valuesSchema);
 const defaultValues = valuesSchema.parse({});
 
 await Deno.writeTextFile(
