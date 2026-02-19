@@ -2,7 +2,7 @@ name: Validate Charts
 
 on:
   pull_request:
-    branches: [ "master" ]
+    branches: ['master']
 
 jobs:
   validate:
@@ -23,7 +23,7 @@ jobs:
       - name: Helm Lint
         run: helm lint charts/application
       - name: Install helm-unittest
-        run: helm plugin install https://github.com/helm-unittest/helm-unittest.git
+        run: helm plugin install --verify=false https://github.com/helm-unittest/helm-unittest.git
       - name: Helm Unit Tests
         run: helm unittest charts/application
       - name: Helm Template Dry-Run
