@@ -2,11 +2,52 @@ suite: test rolebinding
 templates:
   - rolebinding.yaml
 tests:
-  - it: should fail with not implemented yet
-    template: rolebinding.yaml
+  - it: manifest should match snapshot
     set:
       rbac:
         enabled: true
     asserts:
-      - failedTemplate:
-          errorMessage: 'not implemented yet'
+      - matchSnapshot: {}
+
+  - it: labels & annotations should be set
+    set:
+      common:
+        labels:
+          test_common: test
+        annotations:
+          test_common: test
+      rbac:
+        enabled: true
+        rolebinding:
+          labels:
+            test_rb: bar
+          annotations:
+            test_rb: bar
+    asserts:
+      - isKind:
+          of: RoleBinding
+      - isSubset:
+          path: metadata.labels
+          content:
+            test_common: test
+            test_rb: bar
+      - isSubset:
+          path: metadata.annotations
+          content:
+            test_common: test
+            test_rb: bar
+
+  - it: should use custom role name
+    set:
+      rbac:
+        enabled: true
+        rolebinding:
+          roleName: my-custom-role
+          roleKind: ClusterRole
+    asserts:
+      - equal:
+          path: roleRef.name
+          value: my-custom-role
+      - equal:
+          path: roleRef.kind
+          value: ClusterRole

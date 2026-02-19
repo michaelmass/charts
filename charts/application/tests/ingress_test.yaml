@@ -8,6 +8,7 @@ tests:
         enabled: true
     asserts:
       - matchSnapshot: {}
+
   - it: labels & annotations should be set
     set:
       common:
@@ -34,3 +35,27 @@ tests:
           content:
             test_common: test
             test_ingress: bar
+
+  - it: should set TLS with selfSigned
+    set:
+      ingress:
+        enabled: true
+        tls: true
+        selfSigned: true
+        hostname: app.example.com
+    asserts:
+      - isNotNull:
+          path: spec.tls
+      - equal:
+          path: spec.tls[0].hosts[0]
+          value: app.example.com
+
+  - it: should set ingressClassName
+    set:
+      ingress:
+        enabled: true
+        ingressClassName: nginx
+    asserts:
+      - equal:
+          path: spec.ingressClassName
+          value: nginx

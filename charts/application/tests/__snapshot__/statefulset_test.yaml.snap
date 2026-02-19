@@ -1,7 +1,7 @@
 manifest should match snapshot:
   1: |
     apiVersion: apps/v1
-    kind: Deployment
+    kind: StatefulSet
     metadata:
       labels:
         app.kubernetes.io/instance: RELEASE-NAME
@@ -12,13 +12,13 @@ manifest should match snapshot:
       name: release-name-application
       namespace: NAMESPACE
     spec:
+      podManagementPolicy: OrderedReady
       replicas: 1
       selector:
         matchLabels:
           app.kubernetes.io/instance: RELEASE-NAME
           app.kubernetes.io/name: application
-      strategy:
-        type: RollingUpdate
+      serviceName: release-name-application
       template:
         metadata:
           annotations: {}
@@ -90,3 +90,5 @@ manifest should match snapshot:
             fsGroupChangePolicy: Always
             supplementalGroups: []
             sysctls: []
+      updateStrategy:
+        type: RollingUpdate

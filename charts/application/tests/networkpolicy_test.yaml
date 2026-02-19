@@ -2,10 +2,60 @@ suite: test networkpolicy
 templates:
   - 'networkpolicy.yaml'
 tests:
-  - it: should fail with not implemented yet
+  - it: manifest should match snapshot
     set:
       networkpolicy:
         enabled: true
     asserts:
-      - failedTemplate:
-          errorMessage: 'not implemented yet'
+      - matchSnapshot: {}
+
+  - it: labels & annotations should be set
+    set:
+      common:
+        labels:
+          test_common: test
+        annotations:
+          test_common: test
+      networkpolicy:
+        enabled: true
+        labels:
+          test_np: bar
+        annotations:
+          test_np: bar
+    asserts:
+      - isKind:
+          of: NetworkPolicy
+      - isSubset:
+          path: metadata.labels
+          content:
+            test_common: test
+            test_np: bar
+      - isSubset:
+          path: metadata.annotations
+          content:
+            test_common: test
+            test_np: bar
+
+  - it: should set policy types
+    set:
+      networkpolicy:
+        enabled: true
+        policyTypes:
+          - Ingress
+          - Egress
+    asserts:
+      - contains:
+          path: spec.policyTypes
+          content: Ingress
+      - contains:
+          path: spec.policyTypes
+          content: Egress
+
+  - it: should allow all ingress when allowExternal is true
+    set:
+      networkpolicy:
+        enabled: true
+        allowExternal: true
+    asserts:
+      - isNotNull:
+          path: spec.ingress

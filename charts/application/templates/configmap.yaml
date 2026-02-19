@@ -1,3 +1,16 @@
 {{- if .Values.configmap.enabled }}
-{{- fail "not implemented yet" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  {{- $labels := include "common.tplvalues.merge" ( dict "values" ( list .Values.configmap.labels .Values.common.labels ) "context" . ) }}
+  {{- $annotations := include "common.tplvalues.merge" ( dict "values" ( list .Values.configmap.annotations .Values.common.annotations ) "context" . ) }}
+  name: {{ template "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" $labels "context" $ ) | nindent 4 }}
+  {{- if .Values.common.annotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $ ) | nindent 4 }}
+  {{- end }}
+{{- if .Values.configmap.data }}
+data: {{- include "common.tplvalues.render" ( dict "value" .Values.configmap.data "context" $ ) | nindent 2 }}
+{{- end }}
 {{- end }}

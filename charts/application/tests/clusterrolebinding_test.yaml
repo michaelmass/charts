@@ -2,11 +2,51 @@ suite: test clusterrolebinding
 templates:
   - clusterrolebinding.yaml
 tests:
-  - it: should fail with not implemented yet
-    template: clusterrolebinding.yaml
+  - it: manifest should match snapshot
     set:
       rbac:
         enabled: true
     asserts:
-      - failedTemplate:
-          errorMessage: 'not implemented yet'
+      - matchSnapshot: {}
+
+  - it: labels & annotations should be set
+    set:
+      common:
+        labels:
+          test_common: test
+        annotations:
+          test_common: test
+      rbac:
+        enabled: true
+        clusterrolebinding:
+          labels:
+            test_crb: bar
+          annotations:
+            test_crb: bar
+    asserts:
+      - isKind:
+          of: ClusterRoleBinding
+      - isSubset:
+          path: metadata.labels
+          content:
+            test_common: test
+            test_crb: bar
+      - isSubset:
+          path: metadata.annotations
+          content:
+            test_common: test
+            test_crb: bar
+
+  - it: should use custom role name
+    set:
+      rbac:
+        enabled: true
+        clusterrolebinding:
+          roleName: my-cluster-role
+    asserts:
+      - equal:
+          path: roleRef.name
+          value: my-cluster-role
+      - equal:
+          path: roleRef.kind
+          value: ClusterRole

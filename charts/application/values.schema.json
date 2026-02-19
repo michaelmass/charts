@@ -458,7 +458,12 @@
             },
             "pullPolicy": {
               "default": "IfNotPresent",
-              "type": "string"
+              "type": "string",
+              "enum": [
+                "Always",
+                "IfNotPresent",
+                "Never"
+              ]
             },
             "pullSecrets": {
               "default": [],
@@ -482,7 +487,14 @@
           "default": "none",
           "type": "string",
           "enum": [
-            "none"
+            "none",
+            "nano",
+            "micro",
+            "small",
+            "medium",
+            "large",
+            "xlarge",
+            "2xlarge"
           ]
         },
         "resources": {
@@ -536,8 +548,10 @@
           "type": "array",
           "items": {
             "type": "object",
-            "properties": {},
-            "additionalProperties": false
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
           }
         },
         "sidecars": {
@@ -545,14 +559,18 @@
           "type": "array",
           "items": {
             "type": "object",
-            "properties": {},
-            "additionalProperties": false
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
           }
         },
         "affinity": {
           "type": "object",
-          "properties": {},
-          "additionalProperties": false
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {}
         },
         "affinityPreset": {
           "default": "",
@@ -605,16 +623,22 @@
         },
         "nodeSelector": {
           "type": "object",
-          "properties": {},
-          "additionalProperties": false
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "string"
+          }
         },
         "tolerations": {
           "default": [],
           "type": "array",
           "items": {
             "type": "object",
-            "properties": {},
-            "additionalProperties": false
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
           }
         },
         "topologySpreadConstraints": {
@@ -622,8 +646,10 @@
           "type": "array",
           "items": {
             "type": "object",
-            "properties": {},
-            "additionalProperties": false
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
           }
         },
         "securityContext": {
@@ -846,7 +872,9 @@
           "type": "string",
           "enum": [
             "ClusterIP",
-            "LoadBalancer"
+            "LoadBalancer",
+            "NodePort",
+            "ExternalName"
           ]
         },
         "ports": {
@@ -1267,16 +1295,199 @@
         "enabled": {
           "default": false,
           "type": "boolean"
+        },
+        "role": {
+          "type": "object",
+          "properties": {
+            "rules": {
+              "default": [],
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "apiGroups": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "resources": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "verbs": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "apiGroups",
+                  "resources",
+                  "verbs"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "labels": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "annotations": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "rules",
+            "labels",
+            "annotations"
+          ],
+          "additionalProperties": false
+        },
+        "rolebinding": {
+          "type": "object",
+          "properties": {
+            "roleName": {
+              "default": "",
+              "type": "string"
+            },
+            "roleKind": {
+              "default": "Role",
+              "type": "string",
+              "enum": [
+                "Role",
+                "ClusterRole"
+              ]
+            },
+            "labels": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "annotations": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "roleName",
+            "roleKind",
+            "labels",
+            "annotations"
+          ],
+          "additionalProperties": false
+        },
+        "clusterrolebinding": {
+          "type": "object",
+          "properties": {
+            "roleName": {
+              "default": "",
+              "type": "string"
+            },
+            "roleKind": {
+              "default": "ClusterRole",
+              "type": "string",
+              "enum": [
+                "ClusterRole"
+              ]
+            },
+            "labels": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "annotations": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "roleName",
+            "roleKind",
+            "labels",
+            "annotations"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [
-        "enabled"
+        "enabled",
+        "role",
+        "rolebinding",
+        "clusterrolebinding"
       ],
       "additionalProperties": false
     },
     "vpa": {
       "type": "object",
       "properties": {
+        "updateMode": {
+          "default": "Auto",
+          "type": "string",
+          "enum": [
+            "Off",
+            "Initial",
+            "Recreate",
+            "Auto"
+          ]
+        },
+        "controlledResources": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "minAllowed": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "maxAllowed": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "enabled": {
           "default": false,
           "type": "boolean"
@@ -1301,6 +1512,10 @@
         }
       },
       "required": [
+        "updateMode",
+        "controlledResources",
+        "minAllowed",
+        "maxAllowed",
         "enabled",
         "labels",
         "annotations"
@@ -1310,6 +1525,75 @@
     "statefulset": {
       "type": "object",
       "properties": {
+        "replicas": {
+          "default": 1,
+          "type": "number"
+        },
+        "serviceName": {
+          "default": "",
+          "type": "string"
+        },
+        "podManagementPolicy": {
+          "default": "OrderedReady",
+          "type": "string",
+          "enum": [
+            "OrderedReady",
+            "Parallel"
+          ]
+        },
+        "updateStrategy": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "default": "RollingUpdate",
+              "type": "string",
+              "enum": [
+                "RollingUpdate",
+                "OnDelete"
+              ]
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        "volumeClaimTemplates": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "accessModes": {
+                "default": [
+                  "ReadWriteOnce"
+                ],
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "size": {
+                "default": "8Gi",
+                "type": "string"
+              },
+              "storageClassName": {
+                "default": "",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "accessModes",
+              "size",
+              "storageClassName"
+            ],
+            "additionalProperties": false
+          }
+        },
         "enabled": {
           "default": false,
           "type": "boolean"
@@ -1334,6 +1618,11 @@
         }
       },
       "required": [
+        "replicas",
+        "serviceName",
+        "podManagementPolicy",
+        "updateStrategy",
+        "volumeClaimTemplates",
         "enabled",
         "labels",
         "annotations"
@@ -1343,6 +1632,45 @@
     "servicemonitor": {
       "type": "object",
       "properties": {
+        "namespace": {
+          "default": "",
+          "type": "string"
+        },
+        "interval": {
+          "default": "30s",
+          "type": "string"
+        },
+        "scrapeTimeout": {
+          "default": "",
+          "type": "string"
+        },
+        "endpoints": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "port": {
+                "type": "string"
+              },
+              "path": {
+                "default": "/metrics",
+                "type": "string"
+              },
+              "interval": {
+                "type": "string"
+              },
+              "scrapeTimeout": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "port",
+              "path"
+            ],
+            "additionalProperties": false
+          }
+        },
         "enabled": {
           "default": false,
           "type": "boolean"
@@ -1367,6 +1695,10 @@
         }
       },
       "required": [
+        "namespace",
+        "interval",
+        "scrapeTimeout",
+        "endpoints",
         "enabled",
         "labels",
         "annotations"
@@ -1376,6 +1708,28 @@
     "secret": {
       "type": "object",
       "properties": {
+        "type": {
+          "default": "Opaque",
+          "type": "string"
+        },
+        "data": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "stringData": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "enabled": {
           "default": false,
           "type": "boolean"
@@ -1400,6 +1754,9 @@
         }
       },
       "required": [
+        "type",
+        "data",
+        "stringData",
         "enabled",
         "labels",
         "annotations"
@@ -1409,6 +1766,31 @@
     "pvc": {
       "type": "object",
       "properties": {
+        "accessModes": {
+          "default": [
+            "ReadWriteOnce"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "size": {
+          "default": "8Gi",
+          "type": "string"
+        },
+        "storageClassName": {
+          "default": "",
+          "type": "string"
+        },
+        "volumeMode": {
+          "default": "Filesystem",
+          "type": "string",
+          "enum": [
+            "Filesystem",
+            "Block"
+          ]
+        },
         "enabled": {
           "default": false,
           "type": "boolean"
@@ -1433,6 +1815,10 @@
         }
       },
       "required": [
+        "accessModes",
+        "size",
+        "storageClassName",
+        "volumeMode",
         "enabled",
         "labels",
         "annotations"
@@ -1485,6 +1871,45 @@
     "networkpolicy": {
       "type": "object",
       "properties": {
+        "policyTypes": {
+          "default": [
+            "Ingress"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "Ingress",
+              "Egress"
+            ]
+          }
+        },
+        "allowExternal": {
+          "default": true,
+          "type": "boolean"
+        },
+        "ingress": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          }
+        },
+        "egress": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          }
+        },
         "enabled": {
           "default": false,
           "type": "boolean"
@@ -1509,6 +1934,10 @@
         }
       },
       "required": [
+        "policyTypes",
+        "allowExternal",
+        "ingress",
+        "egress",
         "enabled",
         "labels",
         "annotations"
@@ -1518,6 +1947,29 @@
     "hpa": {
       "type": "object",
       "properties": {
+        "minReplicas": {
+          "default": 1,
+          "type": "number"
+        },
+        "maxReplicas": {
+          "default": 3,
+          "type": "number"
+        },
+        "targetCPU": {
+          "default": 80,
+          "type": "number"
+        },
+        "targetMemory": {
+          "default": 0,
+          "type": "number"
+        },
+        "behavior": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {}
+        },
         "enabled": {
           "default": false,
           "type": "boolean"
@@ -1542,6 +1994,11 @@
         }
       },
       "required": [
+        "minReplicas",
+        "maxReplicas",
+        "targetCPU",
+        "targetMemory",
+        "behavior",
         "enabled",
         "labels",
         "annotations"
@@ -1551,6 +2008,23 @@
     "daemonset": {
       "type": "object",
       "properties": {
+        "updateStrategy": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "default": "RollingUpdate",
+              "type": "string",
+              "enum": [
+                "RollingUpdate",
+                "OnDelete"
+              ]
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
         "enabled": {
           "default": false,
           "type": "boolean"
@@ -1575,6 +2049,7 @@
         }
       },
       "required": [
+        "updateStrategy",
         "enabled",
         "labels",
         "annotations"
@@ -1584,6 +2059,15 @@
     "configmap": {
       "type": "object",
       "properties": {
+        "data": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "enabled": {
           "default": false,
           "type": "boolean"
@@ -1608,6 +2092,7 @@
         }
       },
       "required": [
+        "data",
         "enabled",
         "labels",
         "annotations"
@@ -1617,6 +2102,52 @@
     "certificate": {
       "type": "object",
       "properties": {
+        "secretName": {
+          "default": "",
+          "type": "string"
+        },
+        "issuerRef": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "default": "",
+              "type": "string"
+            },
+            "kind": {
+              "default": "ClusterIssuer",
+              "type": "string",
+              "enum": [
+                "Issuer",
+                "ClusterIssuer"
+              ]
+            },
+            "group": {
+              "default": "cert-manager.io",
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "kind",
+            "group"
+          ],
+          "additionalProperties": false
+        },
+        "dnsNames": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "duration": {
+          "default": "",
+          "type": "string"
+        },
+        "renewBefore": {
+          "default": "",
+          "type": "string"
+        },
         "enabled": {
           "default": false,
           "type": "boolean"
@@ -1641,6 +2172,11 @@
         }
       },
       "required": [
+        "secretName",
+        "issuerRef",
+        "dnsNames",
+        "duration",
+        "renewBefore",
         "enabled",
         "labels",
         "annotations"

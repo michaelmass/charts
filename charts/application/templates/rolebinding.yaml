@@ -1,3 +1,21 @@
 {{- if .Values.rbac.enabled }}
-{{- fail "not implemented yet" }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  {{- $labels := include "common.tplvalues.merge" ( dict "values" ( list .Values.rbac.rolebinding.labels .Values.common.labels ) "context" . ) }}
+  {{- $annotations := include "common.tplvalues.merge" ( dict "values" ( list .Values.rbac.rolebinding.annotations .Values.common.annotations ) "context" . ) }}
+  name: {{ template "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" $labels "context" $ ) | nindent 4 }}
+  {{- if .Values.common.annotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $ ) | nindent 4 }}
+  {{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: {{ .Values.rbac.rolebinding.roleKind }}
+  name: {{ default (include "common.names.fullname" .) .Values.rbac.rolebinding.roleName }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "application.serviceAccountName" . }}
+    namespace: {{ include "common.names.namespace" . | quote }}
 {{- end }}

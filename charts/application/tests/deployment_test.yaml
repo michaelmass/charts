@@ -57,3 +57,59 @@ tests:
           content:
             test_common: test
             test_pod: foo
+
+  - it: should set custom resources
+    set:
+      deployment:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: "1"
+            memory: 1Gi
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.cpu
+          value: 500m
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.memory
+          value: 1Gi
+
+  - it: should render startup probe when enabled
+    set:
+      deployment:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+        probes:
+          startup:
+            enabled: true
+            httpGet:
+              path: /healthz
+              port: http
+    asserts:
+      - isNotNull:
+          path: spec.template.spec.containers[0].startupProbe
+
+  - it: should set security context
+    set:
+      deployment:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+        securityContext:
+          enabled: true
+          fsGroup: 2000
+    asserts:
+      - isNotNull:
+          path: spec.template.spec.securityContext

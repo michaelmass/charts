@@ -1,3 +1,131 @@
 {{- if .Values.statefulset.enabled }}
-{{- fail "not implemented yet" }}
+apiVersion: {{ include "common.capabilities.statefulset.apiVersion" . }}
+kind: StatefulSet
+metadata:
+  {{- $statefulsetLabels := include "common.tplvalues.merge" ( dict "values" ( list .Values.statefulset.labels .Values.common.labels ) "context" . ) }}
+  {{- $statefulsetAnnotations := include "common.tplvalues.merge" ( dict "values" ( list .Values.statefulset.annotations .Values.common.annotations ) "context" . ) }}
+  name: {{ template "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" $statefulsetLabels "context" $ ) | nindent 4 }}
+  {{- if .Values.common.annotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" $statefulsetAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  {{- $podLabels := include "common.tplvalues.merge" ( dict "values" ( list .Values.pod.labels .Values.common.labels ) "context" . ) }}
+  {{- $podAnnotations := include "common.tplvalues.merge" ( dict "values" ( list .Values.pod.annotations .Values.common.annotations ) "context" . ) }}
+  replicas: {{ .Values.statefulset.replicas }}
+  serviceName: {{ default (include "common.names.fullname" .) .Values.statefulset.serviceName }}
+  podManagementPolicy: {{ .Values.statefulset.podManagementPolicy }}
+  selector:
+    matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" $podLabels "context" $ ) | nindent 6 }}
+  {{- if .Values.statefulset.updateStrategy }}
+  updateStrategy: {{- include "common.tplvalues.render" (dict "value" .Values.statefulset.updateStrategy "context" $ ) | nindent 4 }}
+  {{- end }}
+  template:
+    metadata:
+      labels: {{- include "common.labels.standard" ( dict "customLabels" $podLabels "context" $ ) | nindent 8 }}
+      {{- if $podAnnotations }}
+      annotations: {{- include "common.tplvalues.render" ( dict "value" $podAnnotations "context" $ ) | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- if .Values.pod.schedulerName }}
+      schedulerName: {{ .Values.pod.schedulerName }}
+      {{- end }}
+      {{- if .Values.pod.priorityClassName }}
+      priorityClassName: {{ .Values.pod.priorityClassName | quote }}
+      {{- end }}
+      {{- if .Values.pod.affinity }}
+      affinity: {{- include "common.tplvalues.render" ( dict "value" .Values.pod.affinity "context" $) | nindent 8 }}
+      {{- else }}
+      affinity:
+        podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.pod.affinityPreset "customLabels" $podLabels "context" $) | nindent 10 }}
+        podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.pod.antiAffinityPreset "customLabels" $podLabels "context" $) | nindent 10 }}
+        nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.pod.nodeAffinityPreset.type "key" .Values.pod.nodeAffinityPreset.key "values" .Values.pod.nodeAffinityPreset.values) | nindent 10 }}
+      {{- end }}
+      {{- if .Values.pod.nodeSelector }}
+      nodeSelector: {{- include "common.tplvalues.render" ( dict "value" .Values.pod.nodeSelector "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.pod.topologySpreadConstraints }}
+      topologySpreadConstraints: {{- include "common.tplvalues.render" (dict "value" .Values.pod.topologySpreadConstraints "context" .) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.pod.tolerations }}
+      tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.pod.tolerations "context" .) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.pod.securityContext.enabled }}
+      securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.pod.securityContext "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.pod.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds: {{ .Values.pod.terminationGracePeriodSeconds }}
+      {{- end }}
+      {{- if .Values.pod.initContainers }}
+      initContainers: {{- include "common.tplvalues.render" (dict "value" .Values.pod.initContainers "context" $) | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ template "common.names.fullname" . }}
+          image: {{ include "common.images.image" (dict "imageRoot" .Values.pod.image "global" .Values.global) }}
+          imagePullPolicy: {{ .Values.pod.image.pullPolicy }}
+          {{- if .Values.pod.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.pod.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.pod.command }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.pod.command "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.pod.args }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.pod.args "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.pod.env.vars }}
+          env:
+            {{- include "common.tplvalues.render" (dict "value" .Values.pod.env.vars "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if (or .Values.pod.env.configmap .Values.pod.env.secret) }}
+          envFrom:
+            {{- if .Values.pod.env.configmap }}
+            - configMapRef:
+                name: {{ include "common.tplvalues.render" (dict "value" .Values.pod.env.configmap "context" $) }}
+            {{- end }}
+            {{- if .Values.pod.env.secret }}
+            - secretRef:
+                name: {{ include "common.tplvalues.render" (dict "value" .Values.pod.env.secret "context" $) }}
+            {{- end }}
+          {{- end }}
+          {{- if .Values.pod.resources }}
+          resources: {{- toYaml .Values.pod.resources | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.pod.containerPorts.http }}
+            {{- if .Values.pod.containerPorts.https }}
+            - name: https
+              containerPort: {{ .Values.pod.containerPorts.https }}
+            {{- end }}
+          {{- if .Values.pod.probes.liveness.enabled }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.pod.probes.liveness "enabled") "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.pod.probes.readiness.enabled }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.pod.probes.readiness "enabled") "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.pod.probes.startup.enabled }}
+          startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.pod.probes.startup "enabled") "context" $) | nindent 12 }}
+          {{- end }}
+        {{- if .Values.pod.sidecars }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.pod.sidecars "context" $) | nindent 8 }}
+        {{- end }}
+  {{- if .Values.statefulset.volumeClaimTemplates }}
+  volumeClaimTemplates:
+    {{- range .Values.statefulset.volumeClaimTemplates }}
+    - metadata:
+        name: {{ .name }}
+      spec:
+        accessModes:
+          {{- range .accessModes }}
+          - {{ . | quote }}
+          {{- end }}
+        {{- if .storageClassName }}
+        storageClassName: {{ .storageClassName | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .size }}
+    {{- end }}
+  {{- end }}
 {{- end }}

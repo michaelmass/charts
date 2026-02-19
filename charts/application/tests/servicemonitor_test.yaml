@@ -2,10 +2,62 @@ suite: test servicemonitor
 templates:
   - 'servicemonitor.yaml'
 tests:
-  - it: should fail with not implemented yet
+  - it: manifest should match snapshot
     set:
       servicemonitor:
         enabled: true
     asserts:
-      - failedTemplate:
-          errorMessage: 'not implemented yet'
+      - matchSnapshot: {}
+
+  - it: labels & annotations should be set
+    set:
+      common:
+        labels:
+          test_common: test
+        annotations:
+          test_common: test
+      servicemonitor:
+        enabled: true
+        labels:
+          test_sm: bar
+        annotations:
+          test_sm: bar
+    asserts:
+      - isKind:
+          of: ServiceMonitor
+      - isSubset:
+          path: metadata.labels
+          content:
+            test_common: test
+            test_sm: bar
+      - isSubset:
+          path: metadata.annotations
+          content:
+            test_common: test
+            test_sm: bar
+
+  - it: should set custom namespace
+    set:
+      servicemonitor:
+        enabled: true
+        namespace: monitoring
+    asserts:
+      - equal:
+          path: metadata.namespace
+          value: monitoring
+
+  - it: should render custom endpoints
+    set:
+      servicemonitor:
+        enabled: true
+        endpoints:
+          - port: metrics
+            path: /custom-metrics
+            interval: 15s
+    asserts:
+      - equal:
+          path: spec.endpoints[0].port
+          value: metrics
+      - equal:
+          path: spec.endpoints[0].path
+          value: /custom-metrics

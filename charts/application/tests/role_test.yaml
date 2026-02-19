@@ -2,11 +2,56 @@ suite: test role
 templates:
   - role.yaml
 tests:
-  - it: should fail with not implemented yet
-    template: role.yaml
+  - it: manifest should match snapshot
     set:
       rbac:
         enabled: true
+        role:
+          rules:
+            - apiGroups: [""]
+              resources: ["pods"]
+              verbs: ["get", "list"]
     asserts:
-      - failedTemplate:
-          errorMessage: 'not implemented yet'
+      - matchSnapshot: {}
+
+  - it: labels & annotations should be set
+    set:
+      common:
+        labels:
+          test_common: test
+        annotations:
+          test_common: test
+      rbac:
+        enabled: true
+        role:
+          labels:
+            test_role: bar
+          annotations:
+            test_role: bar
+    asserts:
+      - isKind:
+          of: Role
+      - isSubset:
+          path: metadata.labels
+          content:
+            test_common: test
+            test_role: bar
+      - isSubset:
+          path: metadata.annotations
+          content:
+            test_common: test
+            test_role: bar
+
+  - it: should render rules
+    set:
+      rbac:
+        enabled: true
+        role:
+          rules:
+            - apiGroups: [""]
+              resources: ["pods"]
+              verbs: ["get", "list", "watch"]
+    asserts:
+      - equal:
+          path: rules[0].verbs
+          value: ["get", "list", "watch"]

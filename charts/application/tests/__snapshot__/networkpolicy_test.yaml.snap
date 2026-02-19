@@ -1,7 +1,7 @@
 manifest should match snapshot:
   1: |
     apiVersion: networking.k8s.io/v1
-    kind: Ingress
+    kind: NetworkPolicy
     metadata:
       labels:
         app.kubernetes.io/instance: RELEASE-NAME
@@ -12,14 +12,11 @@ manifest should match snapshot:
       name: release-name-application
       namespace: NAMESPACE
     spec:
-      rules:
-        - host: application.local
-          http:
-            paths:
-              - backend:
-                  service:
-                    name: release-name-application
-                    port:
-                      name: http
-                path: /
-                pathType: ImplementationSpecific
+      ingress:
+        - {}
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/instance: RELEASE-NAME
+          app.kubernetes.io/name: application
+      policyTypes:
+        - Ingress

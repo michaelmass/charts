@@ -2,10 +2,61 @@ suite: test pvc
 templates:
   - 'pvc.yaml'
 tests:
-  - it: should fail with not implemented yet
+  - it: manifest should match snapshot
     set:
       pvc:
         enabled: true
     asserts:
-      - failedTemplate:
-          errorMessage: 'not implemented yet'
+      - matchSnapshot: {}
+
+  - it: labels & annotations should be set
+    set:
+      common:
+        labels:
+          test_common: test
+        annotations:
+          test_common: test
+      pvc:
+        enabled: true
+        labels:
+          test_pvc: bar
+        annotations:
+          test_pvc: bar
+    asserts:
+      - isKind:
+          of: PersistentVolumeClaim
+      - isSubset:
+          path: metadata.labels
+          content:
+            test_common: test
+            test_pvc: bar
+      - isSubset:
+          path: metadata.annotations
+          content:
+            test_common: test
+            test_pvc: bar
+
+  - it: should set access modes and size
+    set:
+      pvc:
+        enabled: true
+        accessModes:
+          - ReadWriteMany
+        size: 50Gi
+    asserts:
+      - contains:
+          path: spec.accessModes
+          content: ReadWriteMany
+      - equal:
+          path: spec.resources.requests.storage
+          value: 50Gi
+
+  - it: should set storage class
+    set:
+      pvc:
+        enabled: true
+        storageClassName: fast-ssd
+    asserts:
+      - equal:
+          path: spec.storageClassName
+          value: fast-ssd

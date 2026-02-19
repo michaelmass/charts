@@ -1,7 +1,7 @@
 manifest should match snapshot:
   1: |
-    apiVersion: v1
-    kind: Service
+    apiVersion: cert-manager.io/v1
+    kind: Certificate
     metadata:
       labels:
         app.kubernetes.io/instance: RELEASE-NAME
@@ -12,14 +12,10 @@ manifest should match snapshot:
       name: release-name-application
       namespace: NAMESPACE
     spec:
-      ports:
-        - name: http
-          nodePort: null
-          port: 80
-          protocol: TCP
-          targetPort: 8080
-      selector:
-        app.kubernetes.io/instance: RELEASE-NAME
-        app.kubernetes.io/name: application
-      sessionAffinity: None
-      type: ClusterIP
+      dnsNames:
+        - example.com
+      issuerRef:
+        group: cert-manager.io
+        kind: ClusterIssuer
+        name: letsencrypt-prod
+      secretName: release-name-application-tls

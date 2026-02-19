@@ -73,7 +73,7 @@ const ingressSchema = z
 
 const serviceSchema = z
 	.object({
-		type: z.enum(["ClusterIP", "LoadBalancer"]).default("ClusterIP"),
+		type: z.enum(["ClusterIP", "LoadBalancer", "NodePort", "ExternalName"]).default("ClusterIP"),
 		ports: z
 			.object({
 				http: z.number().default(80),
@@ -186,12 +186,12 @@ const podSchema = z
 				repository: z.string().default(""),
 				tag: z.string().default(""),
 				digest: z.string().default(""),
-				pullPolicy: z.string().default("IfNotPresent"), // TODO use an enum
+				pullPolicy: z.enum(["Always", "IfNotPresent", "Never"]).default("IfNotPresent"),
 				pullSecrets: z.string().array().default([]),
 			})
 			.prefault({}),
 
-		resourcesPreset: z.enum(["none"]).default("none"), // TODO add the complete definition
+		resourcesPreset: z.enum(["none", "nano", "micro", "small", "medium", "large", "xlarge", "2xlarge"]).default("none"),
 		resources: z
 			.object({
 				requests: z
@@ -208,9 +208,9 @@ const podSchema = z
 					.prefault({}),
 			})
 			.prefault({}),
-		initContainers: z.object({}).array().default([]), // TODO add the complete definition
-		sidecars: z.object({}).array().default([]), // TODO add the complete definition
-		affinity: z.object({}).prefault({}), // TODO add the complete definition
+		initContainers: z.record(z.string(), z.any()).array().default([]),
+		sidecars: z.record(z.string(), z.any()).array().default([]),
+		affinity: z.record(z.string(), z.any()).prefault({}),
 
 		affinityPreset: z.enum(["", "soft", "hard"]).default(""),
 		antiAffinityPreset: z.enum(["", "soft", "hard"]).default("soft"),
@@ -222,9 +222,9 @@ const podSchema = z
 			})
 			.prefault({}),
 
-		nodeSelector: z.object({}).prefault({}), // TODO add the complete definition
-		tolerations: z.object({}).array().default([]), // TODO add the complete definition
-		topologySpreadConstraints: z.object({}).array().default([]), // TODO add the complete definition
+		nodeSelector: z.record(z.string(), z.string()).prefault({}),
+		tolerations: z.record(z.string(), z.any()).array().default([]),
+		topologySpreadConstraints: z.record(z.string(), z.any()).array().default([]),
 
 		securityContext: z
 			.object({
@@ -277,6 +277,171 @@ const podSchema = z
 	.extend(labelsAndAnnotationsSchema.shape)
 	.prefault({});
 
+const configmapSchema = z
+	.object({
+		data: z.record(z.string(), z.string()).prefault({}),
+	})
+	.extend(commonResourceSchema.shape)
+	.prefault({});
+
+const secretSchema = z
+	.object({
+		type: z.string().default("Opaque"),
+		data: z.record(z.string(), z.string()).prefault({}),
+		stringData: z.record(z.string(), z.string()).prefault({}),
+	})
+	.extend(commonResourceSchema.shape)
+	.prefault({});
+
+const roleSchema = z
+	.object({
+		rules: z
+			.object({
+				apiGroups: z.string().array(),
+				resources: z.string().array(),
+				verbs: z.string().array(),
+			})
+			.array()
+			.default([]),
+	})
+	.extend(labelsAndAnnotationsSchema.shape)
+	.prefault({});
+
+const rolebindingSchema = z
+	.object({
+		roleName: z.string().default(""),
+		roleKind: z.enum(["Role", "ClusterRole"]).default("Role"),
+	})
+	.extend(labelsAndAnnotationsSchema.shape)
+	.prefault({});
+
+const clusterrolebindingSchema = z
+	.object({
+		roleName: z.string().default(""),
+		roleKind: z.enum(["ClusterRole"]).default("ClusterRole"),
+	})
+	.extend(labelsAndAnnotationsSchema.shape)
+	.prefault({});
+
+const rbacSchema = z
+	.object({
+		enabled: z.boolean().default(false),
+		role: roleSchema,
+		rolebinding: rolebindingSchema,
+		clusterrolebinding: clusterrolebindingSchema,
+	})
+	.prefault({});
+
+const hpaSchema = z
+	.object({
+		minReplicas: z.number().default(1),
+		maxReplicas: z.number().default(3),
+		targetCPU: z.number().default(80),
+		targetMemory: z.number().default(0),
+		behavior: z.record(z.string(), z.any()).prefault({}),
+	})
+	.extend(commonResourceSchema.shape)
+	.prefault({});
+
+const vpaSchema = z
+	.object({
+		updateMode: z.enum(["Off", "Initial", "Recreate", "Auto"]).default("Auto"),
+		controlledResources: z.string().array().default([]),
+		minAllowed: z.record(z.string(), z.string()).prefault({}),
+		maxAllowed: z.record(z.string(), z.string()).prefault({}),
+	})
+	.extend(commonResourceSchema.shape)
+	.prefault({});
+
+const statefulsetSchema = z
+	.object({
+		replicas: z.number().default(1),
+		serviceName: z.string().default(""),
+		podManagementPolicy: z.enum(["OrderedReady", "Parallel"]).default("OrderedReady"),
+		updateStrategy: z
+			.object({
+				type: z.enum(["RollingUpdate", "OnDelete"]).default("RollingUpdate"),
+			})
+			.prefault({}),
+		volumeClaimTemplates: z
+			.object({
+				name: z.string(),
+				accessModes: z.string().array().default(["ReadWriteOnce"]),
+				size: z.string().default("8Gi"),
+				storageClassName: z.string().default(""),
+			})
+			.array()
+			.default([]),
+	})
+	.extend(commonResourceSchema.shape)
+	.prefault({});
+
+const daemonsetSchema = z
+	.object({
+		updateStrategy: z
+			.object({
+				type: z.enum(["RollingUpdate", "OnDelete"]).default("RollingUpdate"),
+			})
+			.prefault({}),
+	})
+	.extend(commonResourceSchema.shape)
+	.prefault({});
+
+const pvcSchema = z
+	.object({
+		accessModes: z.string().array().default(["ReadWriteOnce"]),
+		size: z.string().default("8Gi"),
+		storageClassName: z.string().default(""),
+		volumeMode: z.enum(["Filesystem", "Block"]).default("Filesystem"),
+	})
+	.extend(commonResourceSchema.shape)
+	.prefault({});
+
+const networkpolicySchema = z
+	.object({
+		policyTypes: z.enum(["Ingress", "Egress"]).array().default(["Ingress"]),
+		allowExternal: z.boolean().default(true),
+		ingress: z.record(z.string(), z.any()).array().default([]),
+		egress: z.record(z.string(), z.any()).array().default([]),
+	})
+	.extend(commonResourceSchema.shape)
+	.prefault({});
+
+const servicemonitorSchema = z
+	.object({
+		namespace: z.string().default(""),
+		interval: z.string().default("30s"),
+		scrapeTimeout: z.string().default(""),
+		endpoints: z
+			.object({
+				port: z.string(),
+				path: z.string().default("/metrics"),
+				interval: z.string().optional(),
+				scrapeTimeout: z.string().optional(),
+			})
+			.array()
+			.default([]),
+	})
+	.extend(commonResourceSchema.shape)
+	.prefault({});
+
+const certificateSchema = z
+	.object({
+		secretName: z.string().default(""),
+		issuerRef: z
+			.object({
+				name: z.string().default(""),
+				kind: z.enum(["Issuer", "ClusterIssuer"]).default("ClusterIssuer"),
+				group: z.string().default("cert-manager.io"),
+			})
+			.prefault({}),
+		dnsNames: z.string().array().default([]),
+		duration: z.string().default(""),
+		renewBefore: z.string().default(""),
+	})
+	.extend(commonResourceSchema.shape)
+	.prefault({});
+
 const valuesSchema = z
 	.object({
 		global: globalSchema.prefault({}),
@@ -301,16 +466,12 @@ const valuesSchema = z
 			})
 			.extend(commonResourceSchema.shape)
 			.prefault({}),
-		rbac: z
-			.object({
-				enabled: z.boolean().default(false),
-			})
-			.prefault({}),
-		vpa: z.object({}).extend(commonResourceSchema.shape).prefault({}),
-		statefulset: z.object({}).extend(commonResourceSchema.shape).prefault({}),
-		servicemonitor: z.object({}).extend(commonResourceSchema.shape).prefault({}),
-		secret: z.object({}).extend(commonResourceSchema.shape).prefault({}),
-		pvc: z.object({}).extend(commonResourceSchema.shape).prefault({}),
+		rbac: rbacSchema,
+		vpa: vpaSchema,
+		statefulset: statefulsetSchema,
+		servicemonitor: servicemonitorSchema,
+		secret: secretSchema,
+		pvc: pvcSchema,
 		pdb: z
 			.object({
 				minAvailable: z.number().default(1),
@@ -318,11 +479,11 @@ const valuesSchema = z
 			})
 			.extend(commonResourceSchema.shape)
 			.prefault({}),
-		networkpolicy: z.object({}).extend(commonResourceSchema.shape).prefault({}),
-		hpa: z.object({}).extend(commonResourceSchema.shape).prefault({}),
-		daemonset: z.object({}).extend(commonResourceSchema.shape).prefault({}),
-		configmap: z.object({}).extend(commonResourceSchema.shape).prefault({}),
-		certificate: z.object({}).extend(commonResourceSchema.shape).prefault({}),
+		networkpolicy: networkpolicySchema,
+		hpa: hpaSchema,
+		daemonset: daemonsetSchema,
+		configmap: configmapSchema,
+		certificate: certificateSchema,
 		extra: z.string().array().default([]),
 	})
 	.prefault({});

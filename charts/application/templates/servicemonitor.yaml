@@ -1,3 +1,33 @@
 {{- if .Values.servicemonitor.enabled }}
-{{- fail "not implemented yet" }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  {{- $labels := include "common.tplvalues.merge" ( dict "values" ( list .Values.servicemonitor.labels .Values.common.labels ) "context" . ) }}
+  {{- $annotations := include "common.tplvalues.merge" ( dict "values" ( list .Values.servicemonitor.annotations .Values.common.annotations ) "context" . ) }}
+  name: {{ template "common.names.fullname" . }}
+  namespace: {{ default (include "common.names.namespace" .) .Values.servicemonitor.namespace | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" $labels "context" $ ) | nindent 4 }}
+  {{- if .Values.common.annotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  {{- $podLabels := include "common.tplvalues.merge" ( dict "values" ( list .Values.pod.labels .Values.common.labels ) "context" . ) }}
+  selector:
+    matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" $podLabels "context" $ ) | nindent 6 }}
+  namespaceSelector:
+    matchNames:
+      - {{ include "common.names.namespace" . | quote }}
+  {{- if .Values.servicemonitor.endpoints }}
+  endpoints: {{- toYaml .Values.servicemonitor.endpoints | nindent 4 }}
+  {{- else }}
+  endpoints:
+    - port: http
+      path: /metrics
+      {{- if .Values.servicemonitor.interval }}
+      interval: {{ .Values.servicemonitor.interval }}
+      {{- end }}
+      {{- if .Values.servicemonitor.scrapeTimeout }}
+      scrapeTimeout: {{ .Values.servicemonitor.scrapeTimeout }}
+      {{- end }}
+  {{- end }}
 {{- end }}

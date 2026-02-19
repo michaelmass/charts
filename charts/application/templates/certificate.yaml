@@ -1,3 +1,28 @@
 {{- if .Values.certificate.enabled }}
-{{- fail "not implemented yet" }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  {{- $labels := include "common.tplvalues.merge" ( dict "values" ( list .Values.certificate.labels .Values.common.labels ) "context" . ) }}
+  {{- $annotations := include "common.tplvalues.merge" ( dict "values" ( list .Values.certificate.annotations .Values.common.annotations ) "context" . ) }}
+  name: {{ template "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" $labels "context" $ ) | nindent 4 }}
+  {{- if .Values.common.annotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  secretName: {{ default (printf "%s-tls" (include "common.names.fullname" .)) .Values.certificate.secretName }}
+  issuerRef:
+    name: {{ .Values.certificate.issuerRef.name }}
+    kind: {{ .Values.certificate.issuerRef.kind }}
+    group: {{ .Values.certificate.issuerRef.group }}
+  {{- if .Values.certificate.dnsNames }}
+  dnsNames: {{- toYaml .Values.certificate.dnsNames | nindent 4 }}
+  {{- end }}
+  {{- if .Values.certificate.duration }}
+  duration: {{ .Values.certificate.duration }}
+  {{- end }}
+  {{- if .Values.certificate.renewBefore }}
+  renewBefore: {{ .Values.certificate.renewBefore }}
+  {{- end }}
 {{- end }}

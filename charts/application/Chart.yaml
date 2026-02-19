@@ -1,6 +1,7 @@
 apiVersion: v2
 name: application
-version: 0.0.1
+version: 0.1.0
+appVersion: "0.1.0"
 description: Generic helm chart for deploying applications
 type: application
 dependencies:
@@ -8,7 +9,7 @@ dependencies:
     repository: oci://registry-1.docker.io/bitnamicharts
     tags:
       - bitnami-common
-    version: 2.x.x
+    version: ~2.36.0
 keywords:
   - app
   - generic

@@ -2,10 +2,98 @@ suite: test statefulset
 templates:
   - 'statefulset.yaml'
 tests:
-  - it: should fail with not implemented yet
+  - it: manifest should match snapshot
     set:
       statefulset:
         enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
     asserts:
-      - failedTemplate:
-          errorMessage: 'not implemented yet'
+      - matchSnapshot: {}
+
+  - it: labels & annotations should be set
+    set:
+      common:
+        labels:
+          test_common: test
+        annotations:
+          test_common: test
+      statefulset:
+        enabled: true
+        labels:
+          test_sts: bar
+        annotations:
+          test_sts: bar
+      pod:
+        image:
+          repository: example
+          tag: latest
+        labels:
+          test_pod: foo
+        annotations:
+          test_pod: foo
+    asserts:
+      - isKind:
+          of: StatefulSet
+      - isSubset:
+          path: metadata.labels
+          content:
+            test_common: test
+            test_sts: bar
+      - isSubset:
+          path: metadata.annotations
+          content:
+            test_common: test
+            test_sts: bar
+      - isSubset:
+          path: spec.template.metadata.labels
+          content:
+            test_common: test
+            test_pod: foo
+      - isSubset:
+          path: spec.template.metadata.annotations
+          content:
+            test_common: test
+            test_pod: foo
+
+  - it: should set replicas and serviceName
+    set:
+      statefulset:
+        enabled: true
+        replicas: 3
+        serviceName: my-headless
+      pod:
+        image:
+          repository: example
+          tag: latest
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 3
+      - equal:
+          path: spec.serviceName
+          value: my-headless
+
+  - it: should render volumeClaimTemplates
+    set:
+      statefulset:
+        enabled: true
+        volumeClaimTemplates:
+          - name: data
+            accessModes:
+              - ReadWriteOnce
+            size: 10Gi
+            storageClassName: ""
+      pod:
+        image:
+          repository: example
+          tag: latest
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].metadata.name
+          value: data
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.resources.requests.storage
+          value: 10Gi
