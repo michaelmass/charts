@@ -87,7 +87,6 @@ pod:
     fsGroup: 1001
   containerSecurityContext:
     enabled: true
-    seLinuxOptions: null
     runAsUser: 1001
     runAsNonRoot: true
     privileged: false
@@ -131,6 +130,8 @@ ingress:
   extraPaths: []
   extraHosts: []
   extraTls: []
+  extraRules: []
+  selfSigned: false
   enabled: false
   labels: {}
   annotations: {}

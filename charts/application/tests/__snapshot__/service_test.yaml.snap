@@ -16,6 +16,7 @@ manifest should match snapshot:
           nodePort: null
           port: 80
           protocol: TCP
+          targetPort: 8080
       selector:
         app.kubernetes.io/instance: RELEASE-NAME
         app.kubernetes.io/name: application

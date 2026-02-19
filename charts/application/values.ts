@@ -65,6 +65,8 @@ const ingressSchema = z
 			})
 			.array()
 			.default([]),
+		extraRules: z.string().array().default([]),
+		selfSigned: z.boolean().default(false),
 	})
 	.extend(commonResourceSchema.shape)
 	.prefault({})
@@ -95,8 +97,8 @@ const serviceSchema = z
 				name: z.string(),
 				protocol: z.enum(["SCTP", "TCP", "UDP"]).default("TCP"),
 				port: z.number(),
-				nodePort: z.number(),
-				targetPort: z.union([z.string(), z.number()]),
+				nodePort: z.number().optional(),
+				targetPort: z.union([z.string(), z.number()]).optional(),
 			})
 			.array()
 			.default([]),
@@ -236,7 +238,7 @@ const podSchema = z
 						user: z.string(),
 					})
 					.nullable()
-					.default(null),
+					.optional(),
 				runAsUser: z.number().default(1001),
 				runAsNonRoot: z.boolean().default(true),
 				privileged: z.boolean().default(false),

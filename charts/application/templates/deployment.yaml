@@ -27,10 +27,12 @@ spec:
       annotations: {{- include "common.tplvalues.render" ( dict "value" $podAnnotations "context" $ ) | nindent 8 }}
       {{- end }}
     spec:
-      {{- if .Values.schedulerName }}
-      schedulerName: {{ .Values.schedulerName }}
+      {{- if .Values.pod.schedulerName }}
+      schedulerName: {{ .Values.pod.schedulerName }}
       {{- end }}
-      priorityClassName: {{ .Values.priorityClassName | quote }}
+      {{- if .Values.pod.priorityClassName }}
+      priorityClassName: {{ .Values.pod.priorityClassName | quote }}
+      {{- end }}
       {{- if .Values.pod.affinity }}
       affinity: {{- include "common.tplvalues.render" ( dict "value" .Values.pod.affinity "context" $) | nindent 8 }}
       {{- else }}
@@ -70,12 +72,10 @@ spec:
           {{- if .Values.pod.args }}
           args: {{- include "common.tplvalues.render" (dict "value" .Values.pod.args "context" $) | nindent 12 }}
           {{- end }}
+          {{- if .Values.pod.env.vars }}
           env:
-            - name: foo
-              value: bar
-            {{- if .Values.pod.env.vars }}
             {{- include "common.tplvalues.render" (dict "value" .Values.pod.env.vars "context" $) | nindent 12 }}
-            {{- end }}
+          {{- end }}
           {{- if (or .Values.pod.env.configmap .Values.pod.env.secret) }}
           envFrom:
             {{- if .Values.pod.env.configmap }}

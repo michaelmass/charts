@@ -23,12 +23,18 @@
                 "type": "string"
               }
             },
-            "required": ["name"],
+            "required": [
+              "name"
+            ],
             "additionalProperties": false
           }
         }
       },
-      "required": ["imageRegistry", "storageClass", "imagePullSecrets"],
+      "required": [
+        "imageRegistry",
+        "storageClass",
+        "imagePullSecrets"
+      ],
       "additionalProperties": false
     },
     "nameOverride": {
@@ -71,12 +77,18 @@
                     "type": "string"
                   }
                 },
-                "required": ["name"],
+                "required": [
+                  "name"
+                ],
                 "additionalProperties": false
               }
             }
           },
-          "required": ["imageRegistry", "storageClass", "imagePullSecrets"],
+          "required": [
+            "imageRegistry",
+            "storageClass",
+            "imagePullSecrets"
+          ],
           "additionalProperties": false
         },
         "labels": {
@@ -98,7 +110,10 @@
           }
         }
       },
-      "required": ["labels", "annotations"],
+      "required": [
+        "labels",
+        "annotations"
+      ],
       "additionalProperties": false
     },
     "deployment": {
@@ -114,10 +129,14 @@
             "type": {
               "default": "RollingUpdate",
               "type": "string",
-              "enum": ["RollingUpdate"]
+              "enum": [
+                "RollingUpdate"
+              ]
             }
           },
-          "required": ["type"],
+          "required": [
+            "type"
+          ],
           "additionalProperties": false
         },
         "enabled": {
@@ -143,7 +162,13 @@
           }
         }
       },
-      "required": ["replicas", "strategy", "enabled", "labels", "annotations"],
+      "required": [
+        "replicas",
+        "strategy",
+        "enabled",
+        "labels",
+        "annotations"
+      ],
       "additionalProperties": false
     },
     "pod": {
@@ -186,7 +211,9 @@
               "type": "number"
             }
           },
-          "required": ["http"],
+          "required": [
+            "http"
+          ],
           "additionalProperties": false
         },
         "env": {
@@ -205,7 +232,10 @@
                     "type": "string"
                   }
                 },
-                "required": ["name", "value"],
+                "required": [
+                  "name",
+                  "value"
+                ],
                 "additionalProperties": false
               }
             },
@@ -218,7 +248,11 @@
               "type": "string"
             }
           },
-          "required": ["vars", "configmap", "secret"],
+          "required": [
+            "vars",
+            "configmap",
+            "secret"
+          ],
           "additionalProperties": false
         },
         "probes": {
@@ -263,7 +297,10 @@
                       "type": "string"
                     }
                   },
-                  "required": ["path", "port"],
+                  "required": [
+                    "path",
+                    "port"
+                  ],
                   "additionalProperties": false
                 }
               },
@@ -317,7 +354,10 @@
                       "type": "string"
                     }
                   },
-                  "required": ["path", "port"],
+                  "required": [
+                    "path",
+                    "port"
+                  ],
                   "additionalProperties": false
                 }
               },
@@ -371,7 +411,10 @@
                       "type": "string"
                     }
                   },
-                  "required": ["path", "port"],
+                  "required": [
+                    "path",
+                    "port"
+                  ],
                   "additionalProperties": false
                 }
               },
@@ -387,7 +430,11 @@
               "additionalProperties": false
             }
           },
-          "required": ["startup", "liveness", "readiness"],
+          "required": [
+            "startup",
+            "liveness",
+            "readiness"
+          ],
           "additionalProperties": false
         },
         "image": {
@@ -434,7 +481,9 @@
         "resourcesPreset": {
           "default": "none",
           "type": "string",
-          "enum": ["none"]
+          "enum": [
+            "none"
+          ]
         },
         "resources": {
           "type": "object",
@@ -467,12 +516,20 @@
         "affinityPreset": {
           "default": "",
           "type": "string",
-          "enum": ["", "soft", "hard"]
+          "enum": [
+            "",
+            "soft",
+            "hard"
+          ]
         },
         "antiAffinityPreset": {
           "default": "soft",
           "type": "string",
-          "enum": ["", "soft", "hard"]
+          "enum": [
+            "",
+            "soft",
+            "hard"
+          ]
         },
         "nodeAffinityPreset": {
           "type": "object",
@@ -484,7 +541,11 @@
             "key": {
               "default": "",
               "type": "string",
-              "enum": ["", "soft", "hard"]
+              "enum": [
+                "",
+                "soft",
+                "hard"
+              ]
             },
             "values": {
               "default": [],
@@ -494,7 +555,11 @@
               }
             }
           },
-          "required": ["type", "key", "values"],
+          "required": [
+            "type",
+            "key",
+            "values"
+          ],
           "additionalProperties": false
         },
         "nodeSelector": {
@@ -544,7 +609,10 @@
                     "type": "string"
                   }
                 },
-                "required": ["name", "value"],
+                "required": [
+                  "name",
+                  "value"
+                ],
                 "additionalProperties": false
               }
             },
@@ -577,7 +645,6 @@
               "type": "boolean"
             },
             "seLinuxOptions": {
-              "default": null,
               "anyOf": [
                 {
                   "type": "object",
@@ -595,7 +662,12 @@
                       "type": "string"
                     }
                   },
-                  "required": ["level", "role", "type", "user"],
+                  "required": [
+                    "level",
+                    "role",
+                    "type",
+                    "user"
+                  ],
                   "additionalProperties": false
                 },
                 {
@@ -627,7 +699,9 @@
               "type": "object",
               "properties": {
                 "drop": {
-                  "default": ["ALL"],
+                  "default": [
+                    "ALL"
+                  ],
                   "type": "array",
                   "items": {
                     "type": "string"
@@ -641,7 +715,10 @@
                   }
                 }
               },
-              "required": ["drop", "add"],
+              "required": [
+                "drop",
+                "add"
+              ],
               "additionalProperties": false
             },
             "seccompProfile": {
@@ -655,13 +732,14 @@
                   "type": "string"
                 }
               },
-              "required": ["type"],
+              "required": [
+                "type"
+              ],
               "additionalProperties": false
             }
           },
           "required": [
             "enabled",
-            "seLinuxOptions",
             "runAsUser",
             "runAsNonRoot",
             "privileged",
@@ -725,7 +803,10 @@
         "type": {
           "default": "ClusterIP",
           "type": "string",
-          "enum": ["ClusterIP", "LoadBalancer"]
+          "enum": [
+            "ClusterIP",
+            "LoadBalancer"
+          ]
         },
         "ports": {
           "type": "object",
@@ -739,7 +820,10 @@
               "type": "number"
             }
           },
-          "required": ["http", "https"],
+          "required": [
+            "http",
+            "https"
+          ],
           "additionalProperties": false
         },
         "nodePorts": {
@@ -754,13 +838,20 @@
               "type": "string"
             }
           },
-          "required": ["http", "https"],
+          "required": [
+            "http",
+            "https"
+          ],
           "additionalProperties": false
         },
         "protocol": {
           "default": "TCP",
           "type": "string",
-          "enum": ["SCTP", "TCP", "UDP"]
+          "enum": [
+            "SCTP",
+            "TCP",
+            "UDP"
+          ]
         },
         "clusterIP": {
           "default": "",
@@ -797,7 +888,11 @@
               "protocol": {
                 "default": "TCP",
                 "type": "string",
-                "enum": ["SCTP", "TCP", "UDP"]
+                "enum": [
+                  "SCTP",
+                  "TCP",
+                  "UDP"
+                ]
               },
               "port": {
                 "type": "number"
@@ -816,7 +911,11 @@
                 ]
               }
             },
-            "required": ["name", "protocol", "port", "nodePort", "targetPort"],
+            "required": [
+              "name",
+              "protocol",
+              "port"
+            ],
             "additionalProperties": false
           }
         },
@@ -937,7 +1036,9 @@
                                 "type": "string"
                               }
                             },
-                            "required": ["name"],
+                            "required": [
+                              "name"
+                            ],
                             "additionalProperties": false
                           },
                           {
@@ -947,21 +1048,32 @@
                                 "type": "number"
                               }
                             },
-                            "required": ["number"],
+                            "required": [
+                              "number"
+                            ],
                             "additionalProperties": false
                           }
                         ]
                       }
                     },
-                    "required": ["name", "port"],
+                    "required": [
+                      "name",
+                      "port"
+                    ],
                     "additionalProperties": false
                   }
                 },
-                "required": ["service"],
+                "required": [
+                  "service"
+                ],
                 "additionalProperties": false
               }
             },
-            "required": ["path", "pathType", "backend"],
+            "required": [
+              "path",
+              "pathType",
+              "backend"
+            ],
             "additionalProperties": false
           }
         },
@@ -981,7 +1093,11 @@
                 "type": "string"
               }
             },
-            "required": ["name", "path", "pathType"],
+            "required": [
+              "name",
+              "path",
+              "pathType"
+            ],
             "additionalProperties": false
           }
         },
@@ -1001,9 +1117,23 @@
                 "type": "string"
               }
             },
-            "required": ["hosts", "secretName"],
+            "required": [
+              "hosts",
+              "secretName"
+            ],
             "additionalProperties": false
           }
+        },
+        "extraRules": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "selfSigned": {
+          "default": false,
+          "type": "boolean"
         },
         "enabled": {
           "default": false,
@@ -1039,6 +1169,8 @@
         "extraPaths",
         "extraHosts",
         "extraTls",
+        "extraRules",
+        "selfSigned",
         "enabled",
         "labels",
         "annotations"
@@ -1096,7 +1228,9 @@
           "type": "boolean"
         }
       },
-      "required": ["enabled"],
+      "required": [
+        "enabled"
+      ],
       "additionalProperties": false
     },
     "vpa": {
@@ -1125,7 +1259,11 @@
           }
         }
       },
-      "required": ["enabled", "labels", "annotations"],
+      "required": [
+        "enabled",
+        "labels",
+        "annotations"
+      ],
       "additionalProperties": false
     },
     "statefulset": {
@@ -1154,7 +1292,11 @@
           }
         }
       },
-      "required": ["enabled", "labels", "annotations"],
+      "required": [
+        "enabled",
+        "labels",
+        "annotations"
+      ],
       "additionalProperties": false
     },
     "servicemonitor": {
@@ -1183,7 +1325,11 @@
           }
         }
       },
-      "required": ["enabled", "labels", "annotations"],
+      "required": [
+        "enabled",
+        "labels",
+        "annotations"
+      ],
       "additionalProperties": false
     },
     "secret": {
@@ -1212,7 +1358,11 @@
           }
         }
       },
-      "required": ["enabled", "labels", "annotations"],
+      "required": [
+        "enabled",
+        "labels",
+        "annotations"
+      ],
       "additionalProperties": false
     },
     "pvc": {
@@ -1241,7 +1391,11 @@
           }
         }
       },
-      "required": ["enabled", "labels", "annotations"],
+      "required": [
+        "enabled",
+        "labels",
+        "annotations"
+      ],
       "additionalProperties": false
     },
     "pdb": {
@@ -1313,7 +1467,11 @@
           }
         }
       },
-      "required": ["enabled", "labels", "annotations"],
+      "required": [
+        "enabled",
+        "labels",
+        "annotations"
+      ],
       "additionalProperties": false
     },
     "hpa": {
@@ -1342,7 +1500,11 @@
           }
         }
       },
-      "required": ["enabled", "labels", "annotations"],
+      "required": [
+        "enabled",
+        "labels",
+        "annotations"
+      ],
       "additionalProperties": false
     },
     "daemonset": {
@@ -1371,7 +1533,11 @@
           }
         }
       },
-      "required": ["enabled", "labels", "annotations"],
+      "required": [
+        "enabled",
+        "labels",
+        "annotations"
+      ],
       "additionalProperties": false
     },
     "configmap": {
@@ -1400,7 +1566,11 @@
           }
         }
       },
-      "required": ["enabled", "labels", "annotations"],
+      "required": [
+        "enabled",
+        "labels",
+        "annotations"
+      ],
       "additionalProperties": false
     },
     "certificate": {
@@ -1429,7 +1599,11 @@
           }
         }
       },
-      "required": ["enabled", "labels", "annotations"],
+      "required": [
+        "enabled",
+        "labels",
+        "annotations"
+      ],
       "additionalProperties": false
     },
     "extra": {

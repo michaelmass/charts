@@ -1,0 +1,19 @@
+name: Validate Charts
+
+on:
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+      - name: Helm Lint
+        run: helm lint charts/application
+      - name: Install helm-unittest
+        run: helm plugin install https://github.com/helm-unittest/helm-unittest.git
+      - name: Helm Unit Tests
+        run: helm unittest charts/application

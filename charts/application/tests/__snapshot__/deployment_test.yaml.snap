@@ -40,10 +40,7 @@ manifest should match snapshot:
                     topologyKey: kubernetes.io/hostname
                   weight: 1
           containers:
-            - env:
-                - name: foo
-                  value: bar
-              image: docker.io/example:latest
+            - image: docker.io/example:latest
               imagePullPolicy: IfNotPresent
               livenessProbe:
                 failureThreshold: 6
@@ -56,7 +53,7 @@ manifest should match snapshot:
                 timeoutSeconds: 30
               name: RELEASE-NAME-application
               ports:
-                - containerPort: 80
+                - containerPort: 8080
                   name: http
               readinessProbe:
                 failureThreshold: 6
@@ -79,7 +76,6 @@ manifest should match snapshot:
                 runAsUser: 1001
                 seccompProfile:
                   type: RuntimeDefault
-          priorityClassName: null
           securityContext:
             fsGroup: 1001
             fsGroupChangePolicy: Always
