@@ -52,3 +52,42 @@ tests:
           of: ConfigMap
       - isNotNull:
           path: data
+
+  - it: should not render when disabled
+    set:
+      configmap:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should use fullnameOverride in metadata
+    set:
+      fullnameOverride: my-cm
+      configmap:
+        enabled: true
+    asserts:
+      - equal:
+          path: metadata.name
+          value: my-cm
+
+  - it: should use namespaceOverride in metadata
+    set:
+      namespaceOverride: custom-ns
+      configmap:
+        enabled: true
+    asserts:
+      - equal:
+          path: metadata.namespace
+          value: custom-ns
+
+  - it: should not render data section when data is empty
+    set:
+      configmap:
+        enabled: true
+        data: {}
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - isNull:
+          path: data

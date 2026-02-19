@@ -59,3 +59,122 @@ tests:
       - equal:
           path: spec.ingressClassName
           value: nginx
+
+  - it: should not render when disabled
+    set:
+      ingress:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should use fullnameOverride in metadata
+    set:
+      fullnameOverride: my-ingress
+      ingress:
+        enabled: true
+    asserts:
+      - equal:
+          path: metadata.name
+          value: my-ingress
+
+  - it: should set custom hostname and path
+    set:
+      ingress:
+        enabled: true
+        hostname: myapp.example.com
+        path: /api
+        pathType: Prefix
+    asserts:
+      - equal:
+          path: spec.rules[0].host
+          value: myapp.example.com
+      - equal:
+          path: spec.rules[0].http.paths[0].path
+          value: /api
+      - equal:
+          path: spec.rules[0].http.paths[0].pathType
+          value: Prefix
+
+  - it: should render TLS secretName from hostname
+    set:
+      ingress:
+        enabled: true
+        hostname: secure.example.com
+        tls: true
+        selfSigned: true
+    asserts:
+      - equal:
+          path: spec.tls[0].secretName
+          value: secure.example.com-tls
+
+  - it: should not render TLS section when tls is false
+    set:
+      ingress:
+        enabled: true
+        hostname: myapp.example.com
+        tls: false
+        selfSigned: false
+    asserts:
+      - isNull:
+          path: spec.tls
+
+  - it: should render extraHosts
+    set:
+      ingress:
+        enabled: true
+        hostname: main.example.com
+        extraHosts:
+          - name: extra.example.com
+            path: /
+            pathType: ImplementationSpecific
+    asserts:
+      - equal:
+          path: spec.rules[0].host
+          value: main.example.com
+      - equal:
+          path: spec.rules[1].host
+          value: extra.example.com
+
+  - it: should render extraTls
+    set:
+      ingress:
+        enabled: true
+        extraTls:
+          - hosts:
+              - extra-tls.example.com
+            secretName: extra-tls-secret
+    asserts:
+      - equal:
+          path: spec.tls[0].secretName
+          value: extra-tls-secret
+
+  - it: should render extraPaths before main path
+    set:
+      ingress:
+        enabled: true
+        hostname: myapp.example.com
+        extraPaths:
+          - path: /static
+            pathType: Prefix
+            backend:
+              service:
+                name: static-backend
+                port:
+                  number: 80
+    asserts:
+      - equal:
+          path: spec.rules[0].http.paths[0].path
+          value: /static
+      - equal:
+          path: spec.rules[0].http.paths[1].path
+          value: /
+
+  - it: should not render ingressClassName when not set
+    set:
+      ingress:
+        enabled: true
+        ingressClassName: ""
+    asserts:
+      - isNull:
+          path: spec.ingressClassName

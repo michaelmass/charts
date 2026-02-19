@@ -113,3 +113,602 @@ tests:
     asserts:
       - isNotNull:
           path: spec.template.spec.securityContext
+
+  - it: should not render when disabled
+    set:
+      deployment:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should use fullnameOverride in metadata
+    set:
+      fullnameOverride: my-custom-name
+      deployment:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+    asserts:
+      - equal:
+          path: metadata.name
+          value: my-custom-name
+
+  - it: should use namespaceOverride in metadata
+    set:
+      namespaceOverride: custom-ns
+      deployment:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+    asserts:
+      - equal:
+          path: metadata.namespace
+          value: custom-ns
+
+  - it: should set custom replica count
+    set:
+      deployment:
+        enabled: true
+        replicas: 5
+      pod:
+        image:
+          repository: example
+          tag: latest
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 5
+
+  - it: should render image with custom registry
+    set:
+      deployment:
+        enabled: true
+      pod:
+        image:
+          registry: ghcr.io
+          repository: myorg/myapp
+          tag: v1.2.3
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: ghcr.io/myorg/myapp:v1.2.3
+
+  - it: should use global registry override
+    set:
+      global:
+        imageRegistry: registry.example.com
+      deployment:
+        enabled: true
+      pod:
+        image:
+          registry: docker.io
+          repository: myapp
+          tag: latest
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: ^registry\.example\.com/
+
+  - it: should use digest over tag when both specified
+    set:
+      deployment:
+        enabled: true
+      pod:
+        image:
+          registry: docker.io
+          repository: myapp
+          tag: latest
+          digest: sha256:abcdef1234567890
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: "@sha256:abcdef1234567890$"
+
+  - it: should set imagePullPolicy
+    set:
+      deployment:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+          pullPolicy: Always
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].imagePullPolicy
+          value: Always
+
+  - it: should set custom http container port
+    set:
+      deployment:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+        containerPorts:
+          http: 3000
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].ports[0].containerPort
+          value: 3000
+      - equal:
+          path: spec.template.spec.containers[0].ports[0].name
+          value: http
+
+  - it: should add https port when specified
+    set:
+      deployment:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+        containerPorts:
+          http: 8080
+          https: 8443
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].ports[1].name
+          value: https
+      - equal:
+          path: spec.template.spec.containers[0].ports[1].containerPort
+          value: 8443
+
+  - it: should not render https port when not set
+    set:
+      deployment:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+        containerPorts:
+          http: 8080
+    asserts:
+      - lengthEqual:
+          path: spec.template.spec.containers[0].ports
+          count: 1
+
+  - it: should render liveness probe with custom path
+    set:
+      deployment:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+        probes:
+          liveness:
+            enabled: true
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.path
+          value: /healthz
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.initialDelaySeconds
+          value: 10
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.periodSeconds
+          value: 5
+
+  - it: should not render liveness probe when disabled
+    set:
+      deployment:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+        probes:
+          liveness:
+            enabled: false
+          readiness:
+            enabled: false
+    asserts:
+      - isNull:
+          path: spec.template.spec.containers[0].livenessProbe
+
+  - it: should not render readiness probe when disabled
+    set:
+      deployment:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+        probes:
+          liveness:
+            enabled: false
+          readiness:
+            enabled: false
+    asserts:
+      - isNull:
+          path: spec.template.spec.containers[0].readinessProbe
+
+  - it: should render all three probes simultaneously
+    set:
+      deployment:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+        probes:
+          startup:
+            enabled: true
+            httpGet:
+              path: /startup
+              port: http
+          liveness:
+            enabled: true
+            httpGet:
+              path: /live
+              port: http
+          readiness:
+            enabled: true
+            httpGet:
+              path: /ready
+              port: http
+    asserts:
+      - isNotNull:
+          path: spec.template.spec.containers[0].startupProbe
+      - isNotNull:
+          path: spec.template.spec.containers[0].livenessProbe
+      - isNotNull:
+          path: spec.template.spec.containers[0].readinessProbe
+      - equal:
+          path: spec.template.spec.containers[0].startupProbe.httpGet.path
+          value: /startup
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.path
+          value: /live
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.httpGet.path
+          value: /ready
+
+  - it: should render env vars
+    set:
+      deployment:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+        env:
+          vars:
+            - name: FOO
+              value: bar
+            - name: DB_HOST
+              value: postgres
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].env[0].name
+          value: FOO
+      - equal:
+          path: spec.template.spec.containers[0].env[0].value
+          value: bar
+      - equal:
+          path: spec.template.spec.containers[0].env[1].name
+          value: DB_HOST
+      - equal:
+          path: spec.template.spec.containers[0].env[1].value
+          value: postgres
+
+  - it: should render envFrom with configmap and secret refs
+    set:
+      deployment:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+        env:
+          configmap: my-configmap
+          secret: my-secret
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].envFrom[0].configMapRef.name
+          value: my-configmap
+      - equal:
+          path: spec.template.spec.containers[0].envFrom[1].secretRef.name
+          value: my-secret
+
+  - it: should not render envFrom when no configmap or secret ref
+    set:
+      deployment:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+        env:
+          configmap: ""
+          secret: ""
+    asserts:
+      - isNull:
+          path: spec.template.spec.containers[0].envFrom
+
+  - it: should set custom command and args
+    set:
+      deployment:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+        command:
+          - /bin/sh
+          - -c
+        args:
+          - echo hello
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].command[0]
+          value: /bin/sh
+      - equal:
+          path: spec.template.spec.containers[0].args[0]
+          value: echo hello
+
+  - it: should not render command when empty
+    set:
+      deployment:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+        command: []
+    asserts:
+      - isNull:
+          path: spec.template.spec.containers[0].command
+
+  - it: should set pod security context with custom fsGroup
+    set:
+      deployment:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+        securityContext:
+          enabled: true
+          fsGroup: 2000
+    asserts:
+      - equal:
+          path: spec.template.spec.securityContext.fsGroup
+          value: 2000
+
+  - it: should not render pod security context when disabled
+    set:
+      deployment:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+        securityContext:
+          enabled: false
+    asserts:
+      - isNull:
+          path: spec.template.spec.securityContext
+
+  - it: should set container security context values
+    set:
+      deployment:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+        containerSecurityContext:
+          enabled: true
+          runAsUser: 1000
+          runAsNonRoot: true
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsUser
+          value: 1000
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsNonRoot
+          value: true
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.readOnlyRootFilesystem
+          value: true
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.allowPrivilegeEscalation
+          value: false
+
+  - it: should not render container security context when disabled
+    set:
+      deployment:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+        containerSecurityContext:
+          enabled: false
+    asserts:
+      - isNull:
+          path: spec.template.spec.containers[0].securityContext
+
+  - it: should render init containers
+    set:
+      deployment:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+        initContainers:
+          - name: init-db
+            image: busybox:latest
+            command: ["sh", "-c", "echo init"]
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: init-db
+      - equal:
+          path: spec.template.spec.initContainers[0].image
+          value: busybox:latest
+
+  - it: should not render init containers when empty
+    set:
+      deployment:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+        initContainers: []
+    asserts:
+      - isNull:
+          path: spec.template.spec.initContainers
+
+  - it: should render sidecar containers
+    set:
+      deployment:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+        sidecars:
+          - name: log-shipper
+            image: fluentd:latest
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[1].name
+          value: log-shipper
+
+  - it: should set custom affinity
+    set:
+      deployment:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+                - matchExpressions:
+                    - key: kubernetes.io/arch
+                      operator: In
+                      values:
+                        - amd64
+    asserts:
+      - isNotNull:
+          path: spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution
+
+  - it: should set tolerations
+    set:
+      deployment:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+        tolerations:
+          - key: dedicated
+            operator: Equal
+            value: gpu
+            effect: NoSchedule
+    asserts:
+      - equal:
+          path: spec.template.spec.tolerations[0].key
+          value: dedicated
+      - equal:
+          path: spec.template.spec.tolerations[0].effect
+          value: NoSchedule
+
+  - it: should set nodeSelector
+    set:
+      deployment:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+        nodeSelector:
+          disktype: ssd
+    asserts:
+      - equal:
+          path: spec.template.spec.nodeSelector.disktype
+          value: ssd
+
+  - it: should set topologySpreadConstraints
+    set:
+      deployment:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+        topologySpreadConstraints:
+          - maxSkew: 1
+            topologyKey: topology.kubernetes.io/zone
+            whenUnsatisfiable: DoNotSchedule
+    asserts:
+      - equal:
+          path: spec.template.spec.topologySpreadConstraints[0].topologyKey
+          value: topology.kubernetes.io/zone
+
+  - it: should set priorityClassName
+    set:
+      deployment:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+        priorityClassName: high-priority
+    asserts:
+      - equal:
+          path: spec.template.spec.priorityClassName
+          value: high-priority
+
+  - it: should set custom schedulerName
+    set:
+      deployment:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+        schedulerName: custom-scheduler
+    asserts:
+      - equal:
+          path: spec.template.spec.schedulerName
+          value: custom-scheduler
+
+  - it: should set terminationGracePeriodSeconds
+    set:
+      deployment:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+        terminationGracePeriodSeconds: 60
+    asserts:
+      - equal:
+          path: spec.template.spec.terminationGracePeriodSeconds
+          value: 60

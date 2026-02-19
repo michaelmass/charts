@@ -60,3 +60,64 @@ tests:
       - equal:
           path: spec.storageClassName
           value: fast-ssd
+
+  - it: should not render when disabled
+    set:
+      pvc:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should set volumeMode
+    set:
+      pvc:
+        enabled: true
+        volumeMode: Block
+    asserts:
+      - equal:
+          path: spec.volumeMode
+          value: Block
+
+  - it: should default volumeMode to Filesystem
+    set:
+      pvc:
+        enabled: true
+    asserts:
+      - equal:
+          path: spec.volumeMode
+          value: Filesystem
+
+  - it: should set multiple accessModes
+    set:
+      pvc:
+        enabled: true
+        accessModes:
+          - ReadWriteOnce
+          - ReadOnlyMany
+    asserts:
+      - contains:
+          path: spec.accessModes
+          content: ReadWriteOnce
+      - contains:
+          path: spec.accessModes
+          content: ReadOnlyMany
+
+  - it: should not render storageClassName when not set
+    set:
+      pvc:
+        enabled: true
+        storageClassName: ""
+    asserts:
+      - isNull:
+          path: spec.storageClassName
+
+  - it: should use fullnameOverride in metadata
+    set:
+      fullnameOverride: my-pvc
+      pvc:
+        enabled: true
+    asserts:
+      - equal:
+          path: metadata.name
+          value: my-pvc

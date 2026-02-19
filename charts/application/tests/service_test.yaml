@@ -64,3 +64,191 @@ tests:
       - equal:
           path: spec.ports[0].nodePort
           value: 30080
+
+  - it: should not render when disabled
+    set:
+      service:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should use fullnameOverride in metadata
+    set:
+      fullnameOverride: my-svc
+      service:
+        enabled: true
+    asserts:
+      - equal:
+          path: metadata.name
+          value: my-svc
+
+  - it: should use namespaceOverride in metadata
+    set:
+      namespaceOverride: custom-ns
+      service:
+        enabled: true
+    asserts:
+      - equal:
+          path: metadata.namespace
+          value: custom-ns
+
+  - it: should set targetPort when service port differs from container port
+    set:
+      service:
+        enabled: true
+        ports:
+          http: 80
+      pod:
+        containerPorts:
+          http: 3000
+    asserts:
+      - equal:
+          path: spec.ports[0].port
+          value: 80
+      - equal:
+          path: spec.ports[0].targetPort
+          value: 3000
+
+  - it: should not set targetPort when ports match
+    set:
+      service:
+        enabled: true
+        ports:
+          http: 8080
+      pod:
+        containerPorts:
+          http: 8080
+    asserts:
+      - equal:
+          path: spec.ports[0].port
+          value: 8080
+      - isNull:
+          path: spec.ports[0].targetPort
+
+  - it: should set clusterIP when ClusterIP type
+    set:
+      service:
+        enabled: true
+        type: ClusterIP
+        clusterIP: None
+    asserts:
+      - equal:
+          path: spec.clusterIP
+          value: None
+
+  - it: should not set clusterIP for LoadBalancer type
+    set:
+      service:
+        enabled: true
+        type: LoadBalancer
+        clusterIP: 10.0.0.1
+    asserts:
+      - isNull:
+          path: spec.clusterIP
+
+  - it: should set externalTrafficPolicy for LoadBalancer
+    set:
+      service:
+        enabled: true
+        type: LoadBalancer
+        externalTrafficPolicy: Local
+    asserts:
+      - equal:
+          path: spec.externalTrafficPolicy
+          value: "Local"
+
+  - it: should set externalTrafficPolicy for NodePort
+    set:
+      service:
+        enabled: true
+        type: NodePort
+        externalTrafficPolicy: Local
+    asserts:
+      - equal:
+          path: spec.externalTrafficPolicy
+          value: "Local"
+
+  - it: should not set externalTrafficPolicy for ClusterIP
+    set:
+      service:
+        enabled: true
+        type: ClusterIP
+    asserts:
+      - isNull:
+          path: spec.externalTrafficPolicy
+
+  - it: should set sessionAffinity and config
+    set:
+      service:
+        enabled: true
+        sessionAffinity: ClientIP
+        sessionAffinityConfig:
+          clientIP:
+            timeoutSeconds: 10800
+    asserts:
+      - equal:
+          path: spec.sessionAffinity
+          value: ClientIP
+      - equal:
+          path: spec.sessionAffinityConfig.clientIP.timeoutSeconds
+          value: 10800
+
+  - it: should render extra ports
+    set:
+      service:
+        enabled: true
+        extraPorts:
+          - name: grpc
+            port: 9090
+            targetPort: 9090
+            protocol: TCP
+    asserts:
+      - equal:
+          path: spec.ports[1].name
+          value: grpc
+      - equal:
+          path: spec.ports[1].port
+          value: 9090
+
+  - it: should set loadBalancerSourceRanges for LoadBalancer
+    set:
+      service:
+        enabled: true
+        type: LoadBalancer
+        loadBalancerSourceRanges:
+          - 10.0.0.0/8
+    asserts:
+      - isNotNull:
+          path: spec.loadBalancerSourceRanges
+
+  - it: should set protocol on ports
+    set:
+      service:
+        enabled: true
+        protocol: UDP
+    asserts:
+      - equal:
+          path: spec.ports[0].protocol
+          value: UDP
+
+  - it: should set nodePort null for ClusterIP
+    set:
+      service:
+        enabled: true
+        type: ClusterIP
+    asserts:
+      - equal:
+          path: spec.ports[0].nodePort
+          value: null
+
+  - it: should have selector matching standard pod labels
+    set:
+      service:
+        enabled: true
+    asserts:
+      - isSubset:
+          path: spec.selector
+          content:
+            app.kubernetes.io/instance: RELEASE-NAME
+            app.kubernetes.io/name: application

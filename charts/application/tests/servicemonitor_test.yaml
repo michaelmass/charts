@@ -61,3 +61,56 @@ tests:
       - equal:
           path: spec.endpoints[0].path
           value: /custom-metrics
+
+  - it: should not render when disabled
+    set:
+      servicemonitor:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should render default endpoint when no custom endpoints
+    set:
+      servicemonitor:
+        enabled: true
+        interval: 30s
+    asserts:
+      - equal:
+          path: spec.endpoints[0].port
+          value: http
+      - equal:
+          path: spec.endpoints[0].path
+          value: /metrics
+      - equal:
+          path: spec.endpoints[0].interval
+          value: 30s
+
+  - it: should set scrapeTimeout on default endpoint
+    set:
+      servicemonitor:
+        enabled: true
+        scrapeTimeout: 10s
+    asserts:
+      - equal:
+          path: spec.endpoints[0].scrapeTimeout
+          value: 10s
+
+  - it: should have selector matching standard pod labels
+    set:
+      servicemonitor:
+        enabled: true
+    asserts:
+      - isSubset:
+          path: spec.selector.matchLabels
+          content:
+            app.kubernetes.io/instance: RELEASE-NAME
+            app.kubernetes.io/name: application
+
+  - it: should have namespaceSelector
+    set:
+      servicemonitor:
+        enabled: true
+    asserts:
+      - isNotNull:
+          path: spec.namespaceSelector.matchNames

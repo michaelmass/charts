@@ -59,3 +59,81 @@ tests:
     asserts:
       - isNotNull:
           path: spec.ingress
+
+  - it: should not render when disabled
+    set:
+      networkpolicy:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not render ingress when allowExternal is false and no custom rules
+    set:
+      networkpolicy:
+        enabled: true
+        policyTypes:
+          - Ingress
+        allowExternal: false
+    asserts:
+      - isNull:
+          path: spec.ingress
+
+  - it: should render custom ingress rules over allowExternal
+    set:
+      networkpolicy:
+        enabled: true
+        policyTypes:
+          - Ingress
+        ingress:
+          - from:
+              - namespaceSelector:
+                  matchLabels:
+                    name: trusted
+            ports:
+              - port: 8080
+    asserts:
+      - equal:
+          path: spec.ingress[0].from[0].namespaceSelector.matchLabels.name
+          value: trusted
+      - equal:
+          path: spec.ingress[0].ports[0].port
+          value: 8080
+
+  - it: should render egress rules
+    set:
+      networkpolicy:
+        enabled: true
+        policyTypes:
+          - Egress
+        egress:
+          - to:
+              - ipBlock:
+                  cidr: 10.0.0.0/8
+    asserts:
+      - isNotNull:
+          path: spec.egress
+      - equal:
+          path: spec.egress[0].to[0].ipBlock.cidr
+          value: 10.0.0.0/8
+
+  - it: should not render egress when not set
+    set:
+      networkpolicy:
+        enabled: true
+        policyTypes:
+          - Egress
+    asserts:
+      - isNull:
+          path: spec.egress
+
+  - it: should have podSelector matching standard pod labels
+    set:
+      networkpolicy:
+        enabled: true
+    asserts:
+      - isSubset:
+          path: spec.podSelector.matchLabels
+          content:
+            app.kubernetes.io/instance: RELEASE-NAME
+            app.kubernetes.io/name: application

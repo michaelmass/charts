@@ -97,3 +97,131 @@ tests:
       - equal:
           path: spec.volumeClaimTemplates[0].spec.resources.requests.storage
           value: 10Gi
+
+  - it: should not render when disabled
+    set:
+      statefulset:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should use fullnameOverride in metadata
+    set:
+      fullnameOverride: my-sts
+      statefulset:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+    asserts:
+      - equal:
+          path: metadata.name
+          value: my-sts
+
+  - it: should default serviceName to fullname when not set
+    set:
+      fullnameOverride: my-sts
+      statefulset:
+        enabled: true
+        serviceName: ""
+      pod:
+        image:
+          repository: example
+          tag: latest
+    asserts:
+      - equal:
+          path: spec.serviceName
+          value: my-sts
+
+  - it: should set podManagementPolicy
+    set:
+      statefulset:
+        enabled: true
+        podManagementPolicy: Parallel
+      pod:
+        image:
+          repository: example
+          tag: latest
+    asserts:
+      - equal:
+          path: spec.podManagementPolicy
+          value: Parallel
+
+  - it: should set updateStrategy
+    set:
+      statefulset:
+        enabled: true
+        updateStrategy:
+          type: OnDelete
+      pod:
+        image:
+          repository: example
+          tag: latest
+    asserts:
+      - equal:
+          path: spec.updateStrategy.type
+          value: OnDelete
+
+  - it: should not render volumeClaimTemplates when empty
+    set:
+      statefulset:
+        enabled: true
+        volumeClaimTemplates: []
+      pod:
+        image:
+          repository: example
+          tag: latest
+    asserts:
+      - isNull:
+          path: spec.volumeClaimTemplates
+
+  - it: should render volumeClaimTemplate with storageClassName
+    set:
+      statefulset:
+        enabled: true
+        volumeClaimTemplates:
+          - name: data
+            accessModes:
+              - ReadWriteOnce
+            storageClassName: fast-ssd
+            size: 50Gi
+      pod:
+        image:
+          repository: example
+          tag: latest
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: fast-ssd
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.resources.requests.storage
+          value: 50Gi
+
+  - it: should render pod spec same as deployment
+    set:
+      statefulset:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+        containerPorts:
+          http: 3000
+        command:
+          - /app
+        env:
+          vars:
+            - name: DB_HOST
+              value: postgres
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].ports[0].containerPort
+          value: 3000
+      - equal:
+          path: spec.template.spec.containers[0].command[0]
+          value: /app
+      - equal:
+          path: spec.template.spec.containers[0].env[0].name
+          value: DB_HOST

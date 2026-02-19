@@ -74,3 +74,94 @@ tests:
       - equal:
           path: spec.secretName
           value: my-tls-secret
+
+  - it: should not render when disabled
+    set:
+      certificate:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should default secretName to fullname-tls
+    set:
+      fullnameOverride: my-app
+      certificate:
+        enabled: true
+        secretName: ""
+        issuerRef:
+          name: letsencrypt-prod
+    asserts:
+      - equal:
+          path: spec.secretName
+          value: my-app-tls
+
+  - it: should set duration
+    set:
+      certificate:
+        enabled: true
+        issuerRef:
+          name: letsencrypt-prod
+        duration: 2160h
+    asserts:
+      - equal:
+          path: spec.duration
+          value: 2160h
+
+  - it: should set renewBefore
+    set:
+      certificate:
+        enabled: true
+        issuerRef:
+          name: letsencrypt-prod
+        renewBefore: 360h
+    asserts:
+      - equal:
+          path: spec.renewBefore
+          value: 360h
+
+  - it: should not render duration when empty
+    set:
+      certificate:
+        enabled: true
+        issuerRef:
+          name: letsencrypt-prod
+        duration: ""
+    asserts:
+      - isNull:
+          path: spec.duration
+
+  - it: should not render renewBefore when empty
+    set:
+      certificate:
+        enabled: true
+        issuerRef:
+          name: letsencrypt-prod
+        renewBefore: ""
+    asserts:
+      - isNull:
+          path: spec.renewBefore
+
+  - it: should not render dnsNames when empty
+    set:
+      certificate:
+        enabled: true
+        issuerRef:
+          name: letsencrypt-prod
+        dnsNames: []
+    asserts:
+      - isNull:
+          path: spec.dnsNames
+
+  - it: should set issuerRef group
+    set:
+      certificate:
+        enabled: true
+        issuerRef:
+          name: letsencrypt-prod
+          kind: ClusterIssuer
+          group: cert-manager.io
+    asserts:
+      - equal:
+          path: spec.issuerRef.group
+          value: cert-manager.io

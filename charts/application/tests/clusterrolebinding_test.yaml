@@ -50,3 +50,61 @@ tests:
       - equal:
           path: roleRef.kind
           value: ClusterRole
+
+  - it: should not render when disabled
+    set:
+      rbac:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should default roleName to fullname when not set
+    set:
+      fullnameOverride: my-app
+      rbac:
+        enabled: true
+        clusterrolebinding:
+          roleName: ""
+    asserts:
+      - equal:
+          path: roleRef.name
+          value: my-app
+
+  - it: should default roleKind to ClusterRole
+    set:
+      rbac:
+        enabled: true
+    asserts:
+      - equal:
+          path: roleRef.kind
+          value: ClusterRole
+
+  - it: should reference ServiceAccount in subjects
+    set:
+      rbac:
+        enabled: true
+    asserts:
+      - equal:
+          path: subjects[0].kind
+          value: ServiceAccount
+
+  - it: should use custom serviceaccount name in subjects
+    set:
+      rbac:
+        enabled: true
+      serviceaccount:
+        name: my-sa
+    asserts:
+      - equal:
+          path: subjects[0].name
+          value: my-sa
+
+  - it: should set apiGroup in roleRef
+    set:
+      rbac:
+        enabled: true
+    asserts:
+      - equal:
+          path: roleRef.apiGroup
+          value: rbac.authorization.k8s.io

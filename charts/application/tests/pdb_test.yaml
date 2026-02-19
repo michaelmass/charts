@@ -56,3 +56,58 @@ tests:
       - equal:
           path: spec.maxUnavailable
           value: "50%"
+
+  - it: should not render when disabled
+    set:
+      pdb:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not render maxUnavailable when empty
+    set:
+      pdb:
+        enabled: true
+        minAvailable: 1
+        maxUnavailable: ""
+    asserts:
+      - equal:
+          path: spec.minAvailable
+          value: 1
+      - isNull:
+          path: spec.maxUnavailable
+
+  - it: should not render minAvailable when falsy and maxUnavailable set
+    set:
+      pdb:
+        enabled: true
+        minAvailable: 0
+        maxUnavailable: "25%"
+    asserts:
+      - isNull:
+          path: spec.minAvailable
+      - equal:
+          path: spec.maxUnavailable
+          value: "25%"
+
+  - it: should have selector matching standard pod labels
+    set:
+      pdb:
+        enabled: true
+    asserts:
+      - isSubset:
+          path: spec.selector.matchLabels
+          content:
+            app.kubernetes.io/instance: RELEASE-NAME
+            app.kubernetes.io/name: application
+
+  - it: should use fullnameOverride in metadata
+    set:
+      fullnameOverride: my-pdb
+      pdb:
+        enabled: true
+    asserts:
+      - equal:
+          path: metadata.name
+          value: my-pdb
