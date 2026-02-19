@@ -192,7 +192,22 @@ const podSchema = z
 			.prefault({}),
 
 		resourcesPreset: z.enum(["none"]).default("none"), // TODO add the complete definition
-		resources: z.object({}).prefault({}), // TODO add the complete definition
+		resources: z
+			.object({
+				requests: z
+					.object({
+						cpu: z.string().default("100m"),
+						memory: z.string().default("128Mi"),
+					})
+					.prefault({}),
+				limits: z
+					.object({
+						cpu: z.string().default("250m"),
+						memory: z.string().default("256Mi"),
+					})
+					.prefault({}),
+			})
+			.prefault({}),
 		initContainers: z.object({}).array().default([]), // TODO add the complete definition
 		sidecars: z.object({}).array().default([]), // TODO add the complete definition
 		affinity: z.object({}).prefault({}), // TODO add the complete definition
@@ -242,7 +257,7 @@ const podSchema = z
 				runAsUser: z.number().default(1001),
 				runAsNonRoot: z.boolean().default(true),
 				privileged: z.boolean().default(false),
-				readOnlyRootFilesystem: z.boolean().default(false),
+				readOnlyRootFilesystem: z.boolean().default(true),
 				allowPrivilegeEscalation: z.boolean().default(false),
 				capabilities: z
 					.object({
@@ -319,4 +334,5 @@ await Deno.writeTextFile(
 	"values.schema.json",
 	JSON.stringify(jsonSchema, null, 2),
 );
-await Deno.writeTextFile("values.yaml", yaml.stringify(defaultValues));
+const header = "# This file is auto-generated from values.ts. Do not edit directly.\n";
+await Deno.writeTextFile("values.yaml", header + yaml.stringify(defaultValues));

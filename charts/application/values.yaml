@@ -1,3 +1,4 @@
+# This file is auto-generated from values.ts. Do not edit directly.
 global:
   imageRegistry: ''
   storageClass: ''
@@ -66,7 +67,13 @@ pod:
     pullPolicy: IfNotPresent
     pullSecrets: []
   resourcesPreset: none
-  resources: {}
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
   initContainers: []
   sidecars: []
   affinity: {}
@@ -90,7 +97,7 @@ pod:
     runAsUser: 1001
     runAsNonRoot: true
     privileged: false
-    readOnlyRootFilesystem: false
+    readOnlyRootFilesystem: true
     allowPrivilegeEscalation: false
     capabilities:
       drop:

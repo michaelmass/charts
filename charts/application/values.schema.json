@@ -487,7 +487,48 @@
         },
         "resources": {
           "type": "object",
-          "properties": {},
+          "properties": {
+            "requests": {
+              "type": "object",
+              "properties": {
+                "cpu": {
+                  "default": "100m",
+                  "type": "string"
+                },
+                "memory": {
+                  "default": "128Mi",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "cpu",
+                "memory"
+              ],
+              "additionalProperties": false
+            },
+            "limits": {
+              "type": "object",
+              "properties": {
+                "cpu": {
+                  "default": "250m",
+                  "type": "string"
+                },
+                "memory": {
+                  "default": "256Mi",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "cpu",
+                "memory"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "requests",
+            "limits"
+          ],
           "additionalProperties": false
         },
         "initContainers": {
@@ -688,7 +729,7 @@
               "type": "boolean"
             },
             "readOnlyRootFilesystem": {
-              "default": false,
+              "default": true,
               "type": "boolean"
             },
             "allowPrivilegeEscalation": {
