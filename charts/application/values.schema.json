@@ -3,24 +3,29 @@
   "type": "object",
   "properties": {
     "global": {
+      "description": "Global settings shared across all chart resources and subcharts.",
       "type": "object",
       "properties": {
         "imageRegistry": {
           "default": "",
+          "description": "Global Docker image registry that overrides all image.registry values. Useful in air-gapped environments or when using a private mirror. Example: \"registry.example.com\"",
           "type": "string"
         },
         "storageClass": {
           "default": "",
+          "description": "Global storage class to use for all PersistentVolumeClaims. When set, overrides any storageClassName defined at the resource level. Example: \"gp3\"",
           "type": "string"
         },
         "imagePullSecrets": {
           "default": [],
+          "description": "Global list of Docker registry pull secrets. Applied to all pods. Each entry must have a name field referencing an existing Secret. Example: [{ name: \"my-registry-secret\" }]",
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
               "name": {
-                "type": "string"
+                "type": "string",
+                "description": "Name of the Kubernetes Secret containing Docker registry credentials."
               }
             },
             "required": [
@@ -39,17 +44,21 @@
     },
     "nameOverride": {
       "default": "",
+      "description": "Partially override the chart name used in resource names. The release name is still prepended. Example: \"myapp\" results in names like \"release-myapp\"",
       "type": "string"
     },
     "fullnameOverride": {
       "default": "",
+      "description": "Fully override the name used for all resources. Replaces both the release name and chart name entirely. Example: \"my-custom-app\"",
       "type": "string"
     },
     "namespaceOverride": {
       "default": "",
+      "description": "Override the namespace for all resources. Defaults to the Helm release namespace. Example: \"production\"",
       "type": "string"
     },
     "common": {
+      "description": "Common settings applied to all resources. Labels and annotations defined here are merged into every resource's metadata.",
       "type": "object",
       "properties": {
         "exampleValue": {
@@ -61,20 +70,24 @@
           "properties": {
             "imageRegistry": {
               "default": "",
+              "description": "Global Docker image registry that overrides all image.registry values. Useful in air-gapped environments or when using a private mirror. Example: \"registry.example.com\"",
               "type": "string"
             },
             "storageClass": {
               "default": "",
+              "description": "Global storage class to use for all PersistentVolumeClaims. When set, overrides any storageClassName defined at the resource level. Example: \"gp3\"",
               "type": "string"
             },
             "imagePullSecrets": {
               "default": [],
+              "description": "Global list of Docker registry pull secrets. Applied to all pods. Each entry must have a name field referencing an existing Secret. Example: [{ name: \"my-registry-secret\" }]",
               "type": "array",
               "items": {
                 "type": "object",
                 "properties": {
                   "name": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Name of the Kubernetes Secret containing Docker registry credentials."
                   }
                 },
                 "required": [
@@ -92,6 +105,7 @@
           "additionalProperties": false
         },
         "labels": {
+          "description": "Additional labels to add to the resource metadata. Merged with common.labels and standard Helm labels. Example: { team: \"backend\", tier: \"api\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -101,6 +115,7 @@
           }
         },
         "annotations": {
+          "description": "Additional annotations to add to the resource metadata. Merged with common.annotations. Useful for integrations like external-dns, cert-manager, etc. Example: { \"prometheus.io/scrape\": \"true\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -117,17 +132,21 @@
       "additionalProperties": false
     },
     "deployment": {
+      "description": "Deployment workload configuration. Creates a Kubernetes Deployment that manages ReplicaSets and pods. Use for stateless applications. Only one of deployment, statefulset, or daemonset should be enabled.",
       "type": "object",
       "properties": {
         "replicas": {
           "default": 1,
+          "description": "Number of pod replicas to run. Set to 0 to stop all pods without deleting the Deployment. Ignored when HPA is enabled (HPA manages replica count). Example: 3",
           "type": "number"
         },
         "strategy": {
+          "description": "Strategy used to replace old pods with new pods during updates.",
           "type": "object",
           "properties": {
             "type": {
               "default": "RollingUpdate",
+              "description": "Deployment update strategy type. RollingUpdate gradually replaces old pods with new ones. Example: \"RollingUpdate\"",
               "type": "string",
               "enum": [
                 "RollingUpdate"
@@ -141,9 +160,11 @@
         },
         "enabled": {
           "default": false,
+          "description": "Whether to create this resource. When false, the template is not rendered at all. Example: true",
           "type": "boolean"
         },
         "labels": {
+          "description": "Additional labels to add to the resource metadata. Merged with common.labels and standard Helm labels. Example: { team: \"backend\", tier: \"api\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -153,6 +174,7 @@
           }
         },
         "annotations": {
+          "description": "Additional annotations to add to the resource metadata. Merged with common.annotations. Useful for integrations like external-dns, cert-manager, etc. Example: { \"prometheus.io/scrape\": \"true\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -172,22 +194,27 @@
       "additionalProperties": false
     },
     "pod": {
+      "description": "Pod template configuration shared by deployment, statefulset, and daemonset. Controls the container image, ports, probes, env vars, resources, security, and scheduling.",
       "type": "object",
       "properties": {
         "priorityClassName": {
           "default": "",
+          "description": "PriorityClass name for the pod. Controls scheduling priority and preemption. Must reference an existing PriorityClass resource. Example: \"high-priority\"",
           "type": "string"
         },
         "schedulerName": {
           "default": "",
+          "description": "Name of the scheduler to use for pod placement. Leave empty to use the default Kubernetes scheduler. Example: \"custom-scheduler\"",
           "type": "string"
         },
         "terminationGracePeriodSeconds": {
           "default": 0,
+          "description": "Seconds to wait for the pod to gracefully shut down before being forcefully killed. Set this to give your application time to finish in-flight requests and clean up. Example: 30",
           "type": "number"
         },
         "command": {
           "default": [],
+          "description": "Override the container entrypoint. Equivalent to Docker ENTRYPOINT. When set, the image's default entrypoint is replaced entirely. Example: [\"/bin/sh\", \"-c\"]",
           "type": "array",
           "items": {
             "type": "string"
@@ -195,19 +222,23 @@
         },
         "args": {
           "default": [],
+          "description": "Arguments passed to the container entrypoint. Equivalent to Docker CMD. When command is set, these are passed as arguments to it. Example: [\"--config\", \"/etc/app/config.yaml\"]",
           "type": "array",
           "items": {
             "type": "string"
           }
         },
         "containerPorts": {
+          "description": "Ports the container exposes. The http port is always created; https is optional.",
           "type": "object",
           "properties": {
             "http": {
               "default": 8080,
+              "description": "Primary HTTP port the container listens on. This port is always exposed and named 'http'. Example: 3000",
               "type": "number"
             },
             "https": {
+              "description": "HTTPS port the container listens on. Only exposed if set. Named 'https' in the container spec. Example: 8443",
               "type": "number"
             }
           },
@@ -217,19 +248,23 @@
           "additionalProperties": false
         },
         "env": {
+          "description": "Environment variable configuration. Supports direct vars, ConfigMap refs, and Secret refs.",
           "type": "object",
           "properties": {
             "vars": {
               "default": [],
+              "description": "List of environment variables to set on the container. Example: [{ name: \"LOG_LEVEL\", value: \"info\" }, { name: \"PORT\", value: \"8080\" }]",
               "type": "array",
               "items": {
                 "type": "object",
                 "properties": {
                   "name": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Environment variable name. Example: \"DATABASE_URL\""
                   },
                   "value": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Environment variable value. Example: \"postgres://db:5432/myapp\""
                   }
                 },
                 "required": [
@@ -241,10 +276,12 @@
             },
             "configmap": {
               "default": "",
+              "description": "Name of a ConfigMap to load as environment variables via envFrom. All keys in the ConfigMap become environment variables. Example: \"my-app-config\"",
               "type": "string"
             },
             "secret": {
               "default": "",
+              "description": "Name of a Secret to load as environment variables via envFrom. All keys in the Secret become environment variables. Example: \"my-app-secrets\"",
               "type": "string"
             }
           },
@@ -256,44 +293,55 @@
           "additionalProperties": false
         },
         "probes": {
+          "description": "Health check probes for the container. Controls startup, liveness, and readiness behavior.",
           "type": "object",
           "properties": {
             "startup": {
+              "description": "Startup probe configuration. Runs once during container startup. While the startup probe is running, liveness and readiness probes are disabled. Use this for slow-starting containers to avoid premature restarts. Disabled by default.",
               "type": "object",
               "properties": {
                 "enabled": {
                   "default": true,
+                  "description": "Whether to configure this probe on the container. Disable to skip this probe entirely. Example: true",
                   "type": "boolean"
                 },
                 "initialDelaySeconds": {
                   "default": 30,
+                  "description": "Seconds to wait after the container starts before running the first probe. Set higher for slow-starting applications. Example: 60",
                   "type": "number"
                 },
                 "timeoutSeconds": {
                   "default": 30,
+                  "description": "Seconds after which the probe times out if no response is received. Example: 5",
                   "type": "number"
                 },
                 "periodSeconds": {
                   "default": 10,
+                  "description": "How often (in seconds) to perform the probe. Lower values detect failures faster but increase load. Example: 10",
                   "type": "number"
                 },
                 "successThreshold": {
                   "default": 1,
+                  "description": "Minimum consecutive successes for the probe to be considered successful after a failure. Must be 1 for liveness and startup probes. Example: 1",
                   "type": "number"
                 },
                 "failureThreshold": {
                   "default": 6,
+                  "description": "Number of consecutive failures before the probe is considered failed. For liveness probes, this triggers a container restart. Example: 3",
                   "type": "number"
                 },
                 "httpGet": {
+                  "description": "HTTP GET configuration for the probe. The probe sends a GET request to the specified path and port.",
                   "type": "object",
                   "properties": {
                     "path": {
                       "default": "/",
+                      "description": "HTTP path to probe on the container. Should return 2xx/3xx for healthy. Example: \"/healthz\"",
                       "type": "string"
                     },
                     "port": {
                       "default": "http",
+                      "description": "Named port or port number to probe. Uses the container port name. Example: \"http\"",
                       "type": "string"
                     }
                   },
@@ -316,41 +364,51 @@
               "additionalProperties": false
             },
             "liveness": {
+              "description": "Liveness probe configuration. Runs periodically to detect deadlocked or stuck containers. If the probe fails, the container is restarted. Enabled by default with HTTP GET on / port http.",
               "type": "object",
               "properties": {
                 "enabled": {
                   "default": true,
+                  "description": "Whether to configure this probe on the container. Disable to skip this probe entirely. Example: true",
                   "type": "boolean"
                 },
                 "initialDelaySeconds": {
                   "default": 30,
+                  "description": "Seconds to wait after the container starts before running the first probe. Set higher for slow-starting applications. Example: 60",
                   "type": "number"
                 },
                 "timeoutSeconds": {
                   "default": 30,
+                  "description": "Seconds after which the probe times out if no response is received. Example: 5",
                   "type": "number"
                 },
                 "periodSeconds": {
                   "default": 10,
+                  "description": "How often (in seconds) to perform the probe. Lower values detect failures faster but increase load. Example: 10",
                   "type": "number"
                 },
                 "successThreshold": {
                   "default": 1,
+                  "description": "Minimum consecutive successes for the probe to be considered successful after a failure. Must be 1 for liveness and startup probes. Example: 1",
                   "type": "number"
                 },
                 "failureThreshold": {
                   "default": 6,
+                  "description": "Number of consecutive failures before the probe is considered failed. For liveness probes, this triggers a container restart. Example: 3",
                   "type": "number"
                 },
                 "httpGet": {
+                  "description": "HTTP GET configuration for the probe. The probe sends a GET request to the specified path and port.",
                   "type": "object",
                   "properties": {
                     "path": {
                       "default": "/",
+                      "description": "HTTP path to probe on the container. Should return 2xx/3xx for healthy. Example: \"/healthz\"",
                       "type": "string"
                     },
                     "port": {
                       "default": "http",
+                      "description": "Named port or port number to probe. Uses the container port name. Example: \"http\"",
                       "type": "string"
                     }
                   },
@@ -373,41 +431,51 @@
               "additionalProperties": false
             },
             "readiness": {
+              "description": "Readiness probe configuration. Runs periodically to determine if the container can accept traffic. If the probe fails, the pod is removed from Service endpoints. Enabled by default with HTTP GET on / port http.",
               "type": "object",
               "properties": {
                 "enabled": {
                   "default": true,
+                  "description": "Whether to configure this probe on the container. Disable to skip this probe entirely. Example: true",
                   "type": "boolean"
                 },
                 "initialDelaySeconds": {
                   "default": 30,
+                  "description": "Seconds to wait after the container starts before running the first probe. Set higher for slow-starting applications. Example: 60",
                   "type": "number"
                 },
                 "timeoutSeconds": {
                   "default": 30,
+                  "description": "Seconds after which the probe times out if no response is received. Example: 5",
                   "type": "number"
                 },
                 "periodSeconds": {
                   "default": 10,
+                  "description": "How often (in seconds) to perform the probe. Lower values detect failures faster but increase load. Example: 10",
                   "type": "number"
                 },
                 "successThreshold": {
                   "default": 1,
+                  "description": "Minimum consecutive successes for the probe to be considered successful after a failure. Must be 1 for liveness and startup probes. Example: 1",
                   "type": "number"
                 },
                 "failureThreshold": {
                   "default": 6,
+                  "description": "Number of consecutive failures before the probe is considered failed. For liveness probes, this triggers a container restart. Example: 3",
                   "type": "number"
                 },
                 "httpGet": {
+                  "description": "HTTP GET configuration for the probe. The probe sends a GET request to the specified path and port.",
                   "type": "object",
                   "properties": {
                     "path": {
                       "default": "/",
+                      "description": "HTTP path to probe on the container. Should return 2xx/3xx for healthy. Example: \"/healthz\"",
                       "type": "string"
                     },
                     "port": {
                       "default": "http",
+                      "description": "Named port or port number to probe. Uses the container port name. Example: \"http\"",
                       "type": "string"
                     }
                   },
@@ -438,26 +506,32 @@
           "additionalProperties": false
         },
         "image": {
+          "description": "Container image configuration. The final image is assembled as: <registry>/<repository>:<tag> or <registry>/<repository>@<digest>.",
           "type": "object",
           "properties": {
             "registry": {
               "default": "docker.io",
+              "description": "Docker registry hostname. Overridden by global.imageRegistry if set. Example: \"ghcr.io\"",
               "type": "string"
             },
             "repository": {
               "default": "",
+              "description": "Image repository path (without registry or tag). Example: \"myorg/myapp\"",
               "type": "string"
             },
             "tag": {
               "default": "",
+              "description": "Image tag to pull. Ignored if digest is set. Example: \"v1.2.3\"",
               "type": "string"
             },
             "digest": {
               "default": "",
+              "description": "Image digest for immutable deployments. When set, overrides tag. Ensures the exact image is used regardless of tag changes. Example: \"sha256:abc123...\"",
               "type": "string"
             },
             "pullPolicy": {
               "default": "IfNotPresent",
+              "description": "Image pull policy. \"Always\" pulls on every pod start (use with mutable tags like latest). \"IfNotPresent\" only pulls if the image is not cached locally. \"Never\" never pulls (image must exist locally). Example: \"Always\"",
               "type": "string",
               "enum": [
                 "Always",
@@ -467,6 +541,7 @@
             },
             "pullSecrets": {
               "default": [],
+              "description": "Names of Secrets for pulling images from private registries. Applied in addition to global.imagePullSecrets. Example: [\"my-registry-secret\"]",
               "type": "array",
               "items": {
                 "type": "string"
@@ -485,6 +560,7 @@
         },
         "resourcesPreset": {
           "default": "none",
+          "description": "Preset resource configuration from the Bitnami common chart. Set to \"none\" to use the custom resources object below instead. Other values (nano, micro, small, etc.) apply predefined CPU/memory limits. Example: \"small\"",
           "type": "string",
           "enum": [
             "none",
@@ -498,17 +574,21 @@
           ]
         },
         "resources": {
+          "description": "CPU and memory resource requests and limits for the container.",
           "type": "object",
           "properties": {
             "requests": {
+              "description": "Minimum resources guaranteed to the container.",
               "type": "object",
               "properties": {
                 "cpu": {
                   "default": "100m",
+                  "description": "Minimum CPU the container needs. Used by the scheduler for placement. \"100m\" = 0.1 CPU cores. Example: \"250m\"",
                   "type": "string"
                 },
                 "memory": {
                   "default": "128Mi",
+                  "description": "Minimum memory the container needs. Used by the scheduler for placement. Example: \"256Mi\"",
                   "type": "string"
                 }
               },
@@ -519,14 +599,17 @@
               "additionalProperties": false
             },
             "limits": {
+              "description": "Maximum resources the container can consume.",
               "type": "object",
               "properties": {
                 "cpu": {
                   "default": "250m",
+                  "description": "Maximum CPU the container can use. Container is throttled if it exceeds this. Example: \"1\" (1 full core)",
                   "type": "string"
                 },
                 "memory": {
                   "default": "256Mi",
+                  "description": "Maximum memory the container can use. Container is OOM-killed if it exceeds this. Example: \"512Mi\"",
                   "type": "string"
                 }
               },
@@ -545,6 +628,7 @@
         },
         "initContainers": {
           "default": [],
+          "description": "List of init containers to run before the main container starts. Init containers run sequentially and must complete successfully. Use for database migrations, config generation, or waiting on dependencies. Example: [{ name: \"init-db\", image: \"busybox:latest\", command: [\"sh\", \"-c\", \"until nc -z db 5432; do sleep 1; done\"] }]",
           "type": "array",
           "items": {
             "type": "object",
@@ -556,6 +640,7 @@
         },
         "sidecars": {
           "default": [],
+          "description": "Additional containers to run alongside the main container in the same pod. Sidecars share the pod network and can access the same volumes. Example: [{ name: \"log-shipper\", image: \"fluentd:latest\" }]",
           "type": "array",
           "items": {
             "type": "object",
@@ -566,6 +651,7 @@
           }
         },
         "affinity": {
+          "description": "Custom pod affinity rules. When set, overrides affinityPreset, antiAffinityPreset, and nodeAffinityPreset. Use for fine-grained control over pod scheduling. Example: { nodeAffinity: { requiredDuringSchedulingIgnoredDuringExecution: { nodeSelectorTerms: [{ matchExpressions: [{ key: \"kubernetes.io/arch\", operator: \"In\", values: [\"amd64\"] }] }] } } }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -574,6 +660,7 @@
         },
         "affinityPreset": {
           "default": "",
+          "description": "Simple pod affinity preset. Ignored when affinity is set. \"soft\" prefers co-location (preferredDuringScheduling). \"hard\" requires co-location (requiredDuringScheduling). Empty string disables pod affinity. Example: \"soft\"",
           "type": "string",
           "enum": [
             "",
@@ -583,6 +670,7 @@
         },
         "antiAffinityPreset": {
           "default": "soft",
+          "description": "Simple pod anti-affinity preset. Ignored when affinity is set. \"soft\" prefers spreading pods across nodes. \"hard\" requires pods to be on different nodes. Example: \"hard\"",
           "type": "string",
           "enum": [
             "",
@@ -591,14 +679,17 @@
           ]
         },
         "nodeAffinityPreset": {
+          "description": "Simple node affinity preset. Ignored when affinity is set. Schedules pods on nodes matching the specified label key/values.",
           "type": "object",
           "properties": {
             "type": {
               "default": "",
+              "description": "Node affinity type. Ignored when affinity is set. \"soft\" for preferred, \"hard\" for required. Empty to disable. Example: \"hard\"",
               "type": "string"
             },
             "key": {
               "default": "",
+              "description": "Node label key to match. Example: \"kubernetes.io/arch\"",
               "type": "string",
               "enum": [
                 "",
@@ -608,6 +699,7 @@
             },
             "values": {
               "default": [],
+              "description": "Node label values to match against the key. Example: [\"amd64\", \"arm64\"]",
               "type": "array",
               "items": {
                 "type": "string"
@@ -622,6 +714,7 @@
           "additionalProperties": false
         },
         "nodeSelector": {
+          "description": "Node labels that pods must match to be scheduled. Simpler alternative to node affinity for basic label matching. Example: { disktype: \"ssd\", \"node.kubernetes.io/instance-type\": \"m5.large\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -632,6 +725,7 @@
         },
         "tolerations": {
           "default": [],
+          "description": "Tolerations allow pods to be scheduled on tainted nodes. Use to run workloads on dedicated or spot nodes. Example: [{ key: \"dedicated\", operator: \"Equal\", value: \"gpu\", effect: \"NoSchedule\" }]",
           "type": "array",
           "items": {
             "type": "object",
@@ -643,6 +737,7 @@
         },
         "topologySpreadConstraints": {
           "default": [],
+          "description": "Control how pods are spread across topology domains (zones, nodes, etc.). Ensures high availability by distributing pods evenly. Example: [{ maxSkew: 1, topologyKey: \"topology.kubernetes.io/zone\", whenUnsatisfiable: \"DoNotSchedule\" }]",
           "type": "array",
           "items": {
             "type": "object",
@@ -653,27 +748,33 @@
           }
         },
         "securityContext": {
+          "description": "Pod-level security context. Applied to all containers in the pod. Controls filesystem group, sysctls, and supplemental groups.",
           "type": "object",
           "properties": {
             "enabled": {
               "default": true,
+              "description": "Whether to apply the pod-level security context. Set to false to skip rendering the securityContext block entirely. Example: true",
               "type": "boolean"
             },
             "fsGroupChangePolicy": {
               "default": "Always",
+              "description": "Policy for changing ownership of volumes. \"Always\" changes ownership on every mount. \"OnRootMismatch\" only changes if root dir permissions differ. Example: \"OnRootMismatch\"",
               "type": "string"
             },
             "sysctls": {
               "default": [],
+              "description": "Namespaced sysctl settings for the pod. Example: [{ name: \"net.core.somaxconn\", value: \"1024\" }]",
               "type": "array",
               "items": {
                 "type": "object",
                 "properties": {
                   "name": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Sysctl parameter name. Example: \"net.core.somaxconn\""
                   },
                   "value": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Sysctl parameter value. Example: \"1024\""
                   }
                 },
                 "required": [
@@ -685,6 +786,7 @@
             },
             "supplementalGroups": {
               "default": [],
+              "description": "Additional group IDs applied to all containers in the pod. Useful for accessing shared volumes with group permissions. Example: [1000, 2000]",
               "type": "array",
               "items": {
                 "type": "number"
@@ -692,6 +794,7 @@
             },
             "fsGroup": {
               "default": 1001,
+              "description": "Group ID applied to all volumes mounted by the pod. Files created in volumes are owned by this group. Example: 1001",
               "type": "number"
             }
           },
@@ -705,28 +808,35 @@
           "additionalProperties": false
         },
         "containerSecurityContext": {
+          "description": "Container-level security context. Applied to the main container. Controls user, root access, filesystem, capabilities, and seccomp.",
           "type": "object",
           "properties": {
             "enabled": {
               "default": true,
+              "description": "Whether to apply the container-level security context. Set to false to skip rendering the securityContext block on the container. Example: true",
               "type": "boolean"
             },
             "seLinuxOptions": {
+              "description": "SELinux options for the container. Usually not needed unless running on SELinux-enabled nodes.",
               "anyOf": [
                 {
                   "type": "object",
                   "properties": {
                     "level": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "SELinux level label."
                     },
                     "role": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "SELinux role label."
                     },
                     "type": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "SELinux type label."
                     },
                     "user": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "SELinux user label."
                     }
                   },
                   "required": [
@@ -744,31 +854,38 @@
             },
             "runAsUser": {
               "default": 1001,
+              "description": "UID to run the container process as. Use a non-root UID (>= 1000) for security. Example: 1000",
               "type": "number"
             },
             "runAsNonRoot": {
               "default": true,
+              "description": "Require the container to run as a non-root user. Kubernetes will reject pods that attempt to run as root. Example: true",
               "type": "boolean"
             },
             "privileged": {
               "default": false,
+              "description": "Run the container in privileged mode. Grants full access to the host. Almost never needed and is a security risk. Example: false",
               "type": "boolean"
             },
             "readOnlyRootFilesystem": {
               "default": true,
+              "description": "Mount the container's root filesystem as read-only. Prevents malicious writes. Use emptyDir volumes for writable directories. Example: true",
               "type": "boolean"
             },
             "allowPrivilegeEscalation": {
               "default": false,
+              "description": "Whether the process can gain more privileges than its parent. Should be false for most workloads. Required for some setuid binaries. Example: false",
               "type": "boolean"
             },
             "capabilities": {
+              "description": "Linux capabilities to add or drop from the container.",
               "type": "object",
               "properties": {
                 "drop": {
                   "default": [
                     "ALL"
                   ],
+                  "description": "Linux capabilities to drop from the container. [\"ALL\"] drops everything for maximum security. Example: [\"ALL\"]",
                   "type": "array",
                   "items": {
                     "type": "string"
@@ -776,6 +893,7 @@
                 },
                 "add": {
                   "default": [],
+                  "description": "Linux capabilities to add back after dropping. Only add what your application specifically needs. Example: [\"NET_BIND_SERVICE\"]",
                   "type": "array",
                   "items": {
                     "type": "string"
@@ -789,13 +907,16 @@
               "additionalProperties": false
             },
             "seccompProfile": {
+              "description": "Seccomp profile to apply to the container for syscall filtering.",
               "type": "object",
               "properties": {
                 "type": {
                   "default": "RuntimeDefault",
+                  "description": "Seccomp profile type. \"RuntimeDefault\" uses the container runtime's default profile. \"Localhost\" uses a custom profile from the node. \"Unconfined\" disables seccomp (not recommended). Example: \"RuntimeDefault\"",
                   "type": "string"
                 },
                 "localhostProfile": {
+                  "description": "Path to a custom seccomp profile on the node. Only used when type is \"Localhost\". Example: \"profiles/my-profile.json\"",
                   "type": "string"
                 }
               },
@@ -818,6 +939,7 @@
           "additionalProperties": false
         },
         "labels": {
+          "description": "Additional labels to add to the resource metadata. Merged with common.labels and standard Helm labels. Example: { team: \"backend\", tier: \"api\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -827,6 +949,7 @@
           }
         },
         "annotations": {
+          "description": "Additional annotations to add to the resource metadata. Merged with common.annotations. Useful for integrations like external-dns, cert-manager, etc. Example: { \"prometheus.io/scrape\": \"true\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -865,10 +988,12 @@
       "additionalProperties": false
     },
     "service": {
+      "description": "Kubernetes Service configuration. Exposes the application pods via a stable network endpoint. Supports ClusterIP, LoadBalancer, NodePort, and ExternalName types.",
       "type": "object",
       "properties": {
         "type": {
           "default": "ClusterIP",
+          "description": "Kubernetes Service type. \"ClusterIP\" exposes the service on a cluster-internal IP. \"LoadBalancer\" provisions a cloud load balancer. \"NodePort\" exposes the service on each node's IP at a static port. \"ExternalName\" maps to an external DNS name. Example: \"LoadBalancer\"",
           "type": "string",
           "enum": [
             "ClusterIP",
@@ -878,14 +1003,17 @@
           ]
         },
         "ports": {
+          "description": "Port mappings for the Service. Each key maps to a named port on the container.",
           "type": "object",
           "properties": {
             "http": {
               "default": 80,
+              "description": "Service port for HTTP traffic. Maps to the container's http port. Example: 80",
               "type": "number"
             },
             "https": {
               "default": 443,
+              "description": "Service port for HTTPS traffic. Maps to the container's https port. Example: 443",
               "type": "number"
             }
           },
@@ -896,14 +1024,17 @@
           "additionalProperties": false
         },
         "nodePorts": {
+          "description": "Static NodePort assignments. Only applicable when service type is NodePort or LoadBalancer.",
           "type": "object",
           "properties": {
             "http": {
               "default": "",
+              "description": "Static NodePort for HTTP. Only used when type is NodePort or LoadBalancer. Leave empty for auto-assignment. Must be in range 30000-32767. Example: \"30080\"",
               "type": "string"
             },
             "https": {
               "default": "",
+              "description": "Static NodePort for HTTPS. Only used when type is NodePort or LoadBalancer. Example: \"30443\"",
               "type": "string"
             }
           },
@@ -915,6 +1046,7 @@
         },
         "protocol": {
           "default": "TCP",
+          "description": "IP protocol for the Service ports. Most HTTP services use TCP. Use UDP for DNS or game servers. Example: \"TCP\"",
           "type": "string",
           "enum": [
             "SCTP",
@@ -924,22 +1056,27 @@
         },
         "clusterIP": {
           "default": "",
+          "description": "Static ClusterIP address. Only applies when type is ClusterIP. Set to \"None\" for a headless service (used with StatefulSets). Leave empty for auto-assignment. Example: \"None\"",
           "type": "string"
         },
         "loadBalancerIP": {
           "default": "",
+          "description": "Static IP for the cloud load balancer. Only applies when type is LoadBalancer. Not all cloud providers support this. Example: \"203.0.113.10\"",
           "type": "string"
         },
         "externalTrafficPolicy": {
           "default": "Cluster",
+          "description": "How external traffic is routed to pods. Only applies to LoadBalancer and NodePort types. \"Cluster\" distributes to all pods (may add a hop). \"Local\" routes only to pods on the receiving node (preserves client IP). Example: \"Local\"",
           "type": "string"
         },
         "sessionAffinity": {
           "default": "None",
+          "description": "Enable session affinity to route requests from the same client to the same pod. \"None\" disables affinity. \"ClientIP\" enables IP-based session stickiness. Example: \"ClientIP\"",
           "type": "string"
         },
         "loadBalancerSourceRanges": {
           "default": [],
+          "description": "CIDR ranges allowed to access the LoadBalancer. Acts as a firewall rule. Only applies when type is LoadBalancer. Example: [\"10.0.0.0/8\", \"192.168.0.0/16\"]",
           "type": "array",
           "items": {
             "type": "string"
@@ -947,15 +1084,18 @@
         },
         "extraPorts": {
           "default": [],
+          "description": "Additional ports to expose on the Service beyond the default http/https. Example: [{ name: \"grpc\", port: 9090, protocol: \"TCP\" }]",
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
               "name": {
-                "type": "string"
+                "type": "string",
+                "description": "Unique name for the port. Example: \"grpc\""
               },
               "protocol": {
                 "default": "TCP",
+                "description": "Protocol for this port. Example: \"TCP\"",
                 "type": "string",
                 "enum": [
                   "SCTP",
@@ -964,12 +1104,15 @@
                 ]
               },
               "port": {
-                "type": "number"
+                "type": "number",
+                "description": "Service port number. Example: 9090"
               },
               "nodePort": {
+                "description": "Static NodePort. Only for NodePort/LoadBalancer. Example: 30090",
                 "type": "number"
               },
               "targetPort": {
+                "description": "Container port to target. Can be a number or a named port. Example: \"grpc\" or 9090",
                 "anyOf": [
                   {
                     "type": "string"
@@ -989,12 +1132,15 @@
           }
         },
         "sessionAffinityConfig": {
+          "description": "Configuration for session affinity. Only relevant when sessionAffinity is ClientIP. Example: { clientIP: { timeoutSeconds: 3600 } }",
           "type": "object",
           "properties": {
             "clientIP": {
+              "description": "Configuration for ClientIP-based session affinity.",
               "type": "object",
               "properties": {
                 "timeoutSeconds": {
+                  "description": "Timeout in seconds for ClientIP session affinity. Default is 10800 (3 hours). Example: 3600",
                   "type": "number"
                 }
               },
@@ -1005,9 +1151,11 @@
         },
         "enabled": {
           "default": false,
+          "description": "Whether to create this resource. When false, the template is not rendered at all. Example: true",
           "type": "boolean"
         },
         "labels": {
+          "description": "Additional labels to add to the resource metadata. Merged with common.labels and standard Helm labels. Example: { team: \"backend\", tier: \"api\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -1017,6 +1165,7 @@
           }
         },
         "annotations": {
+          "description": "Additional annotations to add to the resource metadata. Merged with common.annotations. Useful for integrations like external-dns, cert-manager, etc. Example: { \"prometheus.io/scrape\": \"true\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -1045,47 +1194,58 @@
       "additionalProperties": false
     },
     "ingress": {
+      "description": "Ingress configuration for HTTP/HTTPS routing. Routes external traffic to the Service based on hostname and path rules.",
       "type": "object",
       "properties": {
         "apiVersion": {
           "default": "",
+          "description": "Override the Ingress API version. Leave empty to auto-detect from cluster capabilities. Only set this if you need to force a specific version. Example: \"networking.k8s.io/v1\"",
           "type": "string"
         },
         "hostname": {
           "default": "application.local",
+          "description": "Primary hostname for the Ingress rule. This is used as the Host header match. Example: \"myapp.example.com\"",
           "type": "string"
         },
         "pathType": {
           "default": "ImplementationSpecific",
+          "description": "How the Ingress path should be matched. \"Prefix\" matches URL path prefixes, \"Exact\" requires an exact match, \"ImplementationSpecific\" depends on the IngressClass. Example: \"Prefix\"",
           "type": "string"
         },
         "path": {
           "default": "/",
+          "description": "URL path to match for the primary hostname rule. Combined with pathType to determine routing behavior. Example: \"/api\"",
           "type": "string"
         },
         "tls": {
           "default": false,
+          "description": "Enable TLS for the primary hostname. When true and selfSigned is true, a TLS secret named <hostname>-tls is referenced. When used with cert-manager annotations, the certificate is provisioned automatically. Example: true",
           "type": "boolean"
         },
         "existingSecretName": {
           "default": "",
+          "description": "Name of an existing TLS Secret to use instead of auto-generated ones. Example: \"my-tls-secret\"",
           "type": "string"
         },
         "ingressClassName": {
           "default": "",
+          "description": "IngressClass resource name. Determines which Ingress controller handles this Ingress. Leave empty to use the cluster default. Example: \"nginx\"",
           "type": "string"
         },
         "extraPaths": {
           "default": [],
+          "description": "Additional paths to add to the primary hostname rule. These are rendered before the main path, allowing you to route specific paths to different backends. Example: [{ path: \"/static\", pathType: \"Prefix\", backend: { service: { name: \"static-svc\", port: { number: 80 } } } }]",
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
               "path": {
-                "type": "string"
+                "type": "string",
+                "description": "URL path to match. Example: \"/static\""
               },
               "pathType": {
-                "type": "string"
+                "type": "string",
+                "description": "Path matching strategy. Example: \"Prefix\""
               },
               "backend": {
                 "type": "object",
@@ -1094,7 +1254,8 @@
                     "type": "object",
                     "properties": {
                       "name": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Name of the Kubernetes Service to route traffic to."
                       },
                       "port": {
                         "anyOf": [
@@ -1102,7 +1263,8 @@
                             "type": "object",
                             "properties": {
                               "name": {
-                                "type": "string"
+                                "type": "string",
+                                "description": "Named port on the Service. Example: \"http\""
                               }
                             },
                             "required": [
@@ -1114,7 +1276,8 @@
                             "type": "object",
                             "properties": {
                               "number": {
-                                "type": "number"
+                                "type": "number",
+                                "description": "Numeric port on the Service. Example: 80"
                               }
                             },
                             "required": [
@@ -1122,20 +1285,23 @@
                             ],
                             "additionalProperties": false
                           }
-                        ]
+                        ],
+                        "description": "Port to use on the backend Service. Specify either name or number."
                       }
                     },
                     "required": [
                       "name",
                       "port"
                     ],
-                    "additionalProperties": false
+                    "additionalProperties": false,
+                    "description": "Backend Service reference for the Ingress path."
                   }
                 },
                 "required": [
                   "service"
                 ],
-                "additionalProperties": false
+                "additionalProperties": false,
+                "description": "Backend Service to route this path to."
               }
             },
             "required": [
@@ -1148,18 +1314,22 @@
         },
         "extraHosts": {
           "default": [],
+          "description": "Additional hostnames to add as separate Ingress rules. Each entry creates a new rule routing to the same backend Service. Example: [{ name: \"api.example.com\", path: \"/\", pathType: \"Prefix\" }]",
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
               "name": {
-                "type": "string"
+                "type": "string",
+                "description": "Hostname for the additional rule. Example: \"api.example.com\""
               },
               "path": {
-                "type": "string"
+                "type": "string",
+                "description": "URL path to match. Example: \"/\""
               },
               "pathType": {
-                "type": "string"
+                "type": "string",
+                "description": "Path matching strategy. Example: \"Prefix\""
               }
             },
             "required": [
@@ -1172,6 +1342,7 @@
         },
         "extraTls": {
           "default": [],
+          "description": "Additional TLS entries for extra hostnames. Each entry references a Secret containing tls.crt and tls.key. Example: [{ hosts: [\"api.example.com\"], secretName: \"api-tls\" }]",
           "type": "array",
           "items": {
             "type": "object",
@@ -1180,10 +1351,12 @@
                 "type": "array",
                 "items": {
                   "type": "string"
-                }
+                },
+                "description": "List of hostnames covered by this TLS certificate. Example: [\"api.example.com\"]"
               },
               "secretName": {
-                "type": "string"
+                "type": "string",
+                "description": "Name of the TLS Secret. Example: \"api-tls-secret\""
               }
             },
             "required": [
@@ -1195,6 +1368,7 @@
         },
         "extraRules": {
           "default": [],
+          "description": "Raw YAML strings for additional Ingress rules. Rendered as-is via tpl. Use this for advanced routing not covered by extraHosts.",
           "type": "array",
           "items": {
             "type": "string"
@@ -1202,13 +1376,16 @@
         },
         "selfSigned": {
           "default": false,
+          "description": "When true and tls is enabled, indicates the TLS certificate is self-signed. The TLS secret name is derived from the hostname (<hostname>-tls). Example: true",
           "type": "boolean"
         },
         "enabled": {
           "default": false,
+          "description": "Whether to create this resource. When false, the template is not rendered at all. Example: true",
           "type": "boolean"
         },
         "labels": {
+          "description": "Additional labels to add to the resource metadata. Merged with common.labels and standard Helm labels. Example: { team: \"backend\", tier: \"api\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -1218,6 +1395,7 @@
           }
         },
         "annotations": {
+          "description": "Additional annotations to add to the resource metadata. Merged with common.annotations. Useful for integrations like external-dns, cert-manager, etc. Example: { \"prometheus.io/scrape\": \"true\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -1247,21 +1425,26 @@
       "additionalProperties": false
     },
     "serviceaccount": {
+      "description": "ServiceAccount configuration. Creates a Kubernetes identity for pods. Required for RBAC and integration with cloud IAM (e.g., AWS IRSA, GCP Workload Identity).",
       "type": "object",
       "properties": {
         "name": {
           "default": "",
+          "description": "Custom name for the ServiceAccount. Defaults to the chart fullname. Example: \"my-app-sa\"",
           "type": "string"
         },
         "automountServiceAccountToken": {
           "default": false,
+          "description": "Whether to mount the ServiceAccount token into pods. Set to true if your application needs to call the Kubernetes API. Keep false for better security when API access is not needed. Example: true",
           "type": "boolean"
         },
         "enabled": {
           "default": false,
+          "description": "Whether to create this resource. When false, the template is not rendered at all. Example: true",
           "type": "boolean"
         },
         "labels": {
+          "description": "Additional labels to add to the resource metadata. Merged with common.labels and standard Helm labels. Example: { team: \"backend\", tier: \"api\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -1271,6 +1454,7 @@
           }
         },
         "annotations": {
+          "description": "Additional annotations to add to the resource metadata. Merged with common.annotations. Useful for integrations like external-dns, cert-manager, etc. Example: { \"prometheus.io/scrape\": \"true\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -1290,17 +1474,21 @@
       "additionalProperties": false
     },
     "rbac": {
+      "description": "RBAC configuration. Creates Role, RoleBinding, and ClusterRoleBinding resources. Enable when your application needs Kubernetes API access (e.g., reading Secrets, listing pods).",
       "type": "object",
       "properties": {
         "enabled": {
           "default": false,
+          "description": "Whether to create RBAC resources (Role, RoleBinding, ClusterRoleBinding). Enable when your application needs to interact with the Kubernetes API. Example: true",
           "type": "boolean"
         },
         "role": {
+          "description": "Configuration for the namespaced Role resource.",
           "type": "object",
           "properties": {
             "rules": {
               "default": [],
+              "description": "RBAC rules defining what permissions the Role grants. Example: [{ apiGroups: [\"\"], resources: [\"pods\"], verbs: [\"get\", \"list\", \"watch\"] }]",
               "type": "array",
               "items": {
                 "type": "object",
@@ -1309,19 +1497,22 @@
                     "type": "array",
                     "items": {
                       "type": "string"
-                    }
+                    },
+                    "description": "Kubernetes API groups this rule applies to. Use \"\" for the core API group. Example: [\"\", \"apps\", \"batch\"]"
                   },
                   "resources": {
                     "type": "array",
                     "items": {
                       "type": "string"
-                    }
+                    },
+                    "description": "Kubernetes resources this rule grants access to. Example: [\"pods\", \"services\", \"deployments\"]"
                   },
                   "verbs": {
                     "type": "array",
                     "items": {
                       "type": "string"
-                    }
+                    },
+                    "description": "Actions allowed on the resources. Example: [\"get\", \"list\", \"watch\", \"create\", \"update\", \"delete\"]"
                   }
                 },
                 "required": [
@@ -1333,6 +1524,7 @@
               }
             },
             "labels": {
+              "description": "Additional labels to add to the resource metadata. Merged with common.labels and standard Helm labels. Example: { team: \"backend\", tier: \"api\" }",
               "type": "object",
               "propertyNames": {
                 "type": "string"
@@ -1342,6 +1534,7 @@
               }
             },
             "annotations": {
+              "description": "Additional annotations to add to the resource metadata. Merged with common.annotations. Useful for integrations like external-dns, cert-manager, etc. Example: { \"prometheus.io/scrape\": \"true\" }",
               "type": "object",
               "propertyNames": {
                 "type": "string"
@@ -1359,14 +1552,17 @@
           "additionalProperties": false
         },
         "rolebinding": {
+          "description": "Configuration for the RoleBinding resource.",
           "type": "object",
           "properties": {
             "roleName": {
               "default": "",
+              "description": "Name of the Role or ClusterRole to bind. Defaults to the chart fullname (the auto-generated Role). Set this to bind to a pre-existing role. Example: \"my-existing-role\"",
               "type": "string"
             },
             "roleKind": {
               "default": "Role",
+              "description": "Kind of role to bind. \"Role\" binds a namespaced Role. \"ClusterRole\" binds a ClusterRole (can grant cluster-wide permissions within the namespace). Example: \"ClusterRole\"",
               "type": "string",
               "enum": [
                 "Role",
@@ -1374,6 +1570,7 @@
               ]
             },
             "labels": {
+              "description": "Additional labels to add to the resource metadata. Merged with common.labels and standard Helm labels. Example: { team: \"backend\", tier: \"api\" }",
               "type": "object",
               "propertyNames": {
                 "type": "string"
@@ -1383,6 +1580,7 @@
               }
             },
             "annotations": {
+              "description": "Additional annotations to add to the resource metadata. Merged with common.annotations. Useful for integrations like external-dns, cert-manager, etc. Example: { \"prometheus.io/scrape\": \"true\" }",
               "type": "object",
               "propertyNames": {
                 "type": "string"
@@ -1401,20 +1599,24 @@
           "additionalProperties": false
         },
         "clusterrolebinding": {
+          "description": "Configuration for the ClusterRoleBinding resource.",
           "type": "object",
           "properties": {
             "roleName": {
               "default": "",
+              "description": "Name of the ClusterRole to bind. Defaults to the chart fullname. Set this to bind to a pre-existing ClusterRole. Example: \"my-cluster-role\"",
               "type": "string"
             },
             "roleKind": {
               "default": "ClusterRole",
+              "description": "Kind of role to bind. Always ClusterRole for ClusterRoleBindings. Example: \"ClusterRole\"",
               "type": "string",
               "enum": [
                 "ClusterRole"
               ]
             },
             "labels": {
+              "description": "Additional labels to add to the resource metadata. Merged with common.labels and standard Helm labels. Example: { team: \"backend\", tier: \"api\" }",
               "type": "object",
               "propertyNames": {
                 "type": "string"
@@ -1424,6 +1626,7 @@
               }
             },
             "annotations": {
+              "description": "Additional annotations to add to the resource metadata. Merged with common.annotations. Useful for integrations like external-dns, cert-manager, etc. Example: { \"prometheus.io/scrape\": \"true\" }",
               "type": "object",
               "propertyNames": {
                 "type": "string"
@@ -1451,10 +1654,12 @@
       "additionalProperties": false
     },
     "vpa": {
+      "description": "VerticalPodAutoscaler configuration. Automatically adjusts container CPU and memory requests/limits. Requires the VPA controller to be installed in the cluster.",
       "type": "object",
       "properties": {
         "updateMode": {
           "default": "Auto",
+          "description": "How the VPA applies resource recommendations. \"Off\" only generates recommendations (no action). \"Initial\" applies recommendations only at pod creation. \"Recreate\" evicts pods to apply new recommendations. \"Auto\" lets the VPA choose the best method. Example: \"Off\"",
           "type": "string",
           "enum": [
             "Off",
@@ -1465,12 +1670,14 @@
         },
         "controlledResources": {
           "default": [],
+          "description": "Which resources the VPA manages. Empty means the VPA decides. Example: [\"cpu\", \"memory\"]",
           "type": "array",
           "items": {
             "type": "string"
           }
         },
         "minAllowed": {
+          "description": "Minimum resource values the VPA can recommend. Prevents the VPA from setting resources too low. Example: { cpu: \"100m\", memory: \"128Mi\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -1480,6 +1687,7 @@
           }
         },
         "maxAllowed": {
+          "description": "Maximum resource values the VPA can recommend. Prevents the VPA from requesting excessive resources. Example: { cpu: \"4\", memory: \"8Gi\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -1490,9 +1698,11 @@
         },
         "enabled": {
           "default": false,
+          "description": "Whether to create this resource. When false, the template is not rendered at all. Example: true",
           "type": "boolean"
         },
         "labels": {
+          "description": "Additional labels to add to the resource metadata. Merged with common.labels and standard Helm labels. Example: { team: \"backend\", tier: \"api\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -1502,6 +1712,7 @@
           }
         },
         "annotations": {
+          "description": "Additional annotations to add to the resource metadata. Merged with common.annotations. Useful for integrations like external-dns, cert-manager, etc. Example: { \"prometheus.io/scrape\": \"true\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -1523,18 +1734,22 @@
       "additionalProperties": false
     },
     "statefulset": {
+      "description": "StatefulSet workload configuration. Creates pods with stable network identities and persistent storage. Use for databases, message queues, and other stateful applications. Only one of deployment, statefulset, or daemonset should be enabled.",
       "type": "object",
       "properties": {
         "replicas": {
           "default": 1,
+          "description": "Number of pod replicas. Each replica gets a stable hostname (pod-0, pod-1, etc.) and its own PersistentVolumeClaim. Example: 3",
           "type": "number"
         },
         "serviceName": {
           "default": "",
+          "description": "Name of the headless Service that controls the network identity of pods. Defaults to the chart fullname. Each pod gets a DNS entry: <pod>.<serviceName>.<namespace>.svc.cluster.local. Example: \"my-headless-svc\"",
           "type": "string"
         },
         "podManagementPolicy": {
           "default": "OrderedReady",
+          "description": "Controls how pods are created and deleted. \"OrderedReady\" creates/deletes pods sequentially (pod-0 before pod-1). \"Parallel\" creates/deletes all pods simultaneously for faster scaling. Example: \"Parallel\"",
           "type": "string",
           "enum": [
             "OrderedReady",
@@ -1542,10 +1757,12 @@
           ]
         },
         "updateStrategy": {
+          "description": "Strategy for rolling out updates to StatefulSet pods.",
           "type": "object",
           "properties": {
             "type": {
               "default": "RollingUpdate",
+              "description": "StatefulSet update strategy. \"RollingUpdate\" updates pods in reverse ordinal order automatically. \"OnDelete\" only updates pods when they are manually deleted. Example: \"OnDelete\"",
               "type": "string",
               "enum": [
                 "RollingUpdate",
@@ -1560,17 +1777,20 @@
         },
         "volumeClaimTemplates": {
           "default": [],
+          "description": "PersistentVolumeClaim templates. Each template creates a volume per replica. Volumes persist across pod restarts and rescheduling. Example: [{ name: \"data\", accessModes: [\"ReadWriteOnce\"], size: \"10Gi\" }]",
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
               "name": {
-                "type": "string"
+                "type": "string",
+                "description": "Name of the volume claim. Used to mount the volume in pod spec. Example: \"data\""
               },
               "accessModes": {
                 "default": [
                   "ReadWriteOnce"
                 ],
+                "description": "How the volume can be mounted. \"ReadWriteOnce\" allows read-write by a single node. \"ReadOnlyMany\" allows read-only by multiple nodes. \"ReadWriteMany\" allows read-write by multiple nodes. Example: [\"ReadWriteOnce\"]",
                 "type": "array",
                 "items": {
                   "type": "string"
@@ -1578,10 +1798,12 @@
               },
               "size": {
                 "default": "8Gi",
+                "description": "Storage size to request. Each replica gets its own volume of this size. Example: \"50Gi\"",
                 "type": "string"
               },
               "storageClassName": {
                 "default": "",
+                "description": "StorageClass for dynamic volume provisioning. Leave empty to use the cluster default StorageClass. Example: \"gp3\"",
                 "type": "string"
               }
             },
@@ -1596,9 +1818,11 @@
         },
         "enabled": {
           "default": false,
+          "description": "Whether to create this resource. When false, the template is not rendered at all. Example: true",
           "type": "boolean"
         },
         "labels": {
+          "description": "Additional labels to add to the resource metadata. Merged with common.labels and standard Helm labels. Example: { team: \"backend\", tier: \"api\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -1608,6 +1832,7 @@
           }
         },
         "annotations": {
+          "description": "Additional annotations to add to the resource metadata. Merged with common.annotations. Useful for integrations like external-dns, cert-manager, etc. Example: { \"prometheus.io/scrape\": \"true\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -1630,37 +1855,46 @@
       "additionalProperties": false
     },
     "servicemonitor": {
+      "description": "Prometheus ServiceMonitor configuration. Creates a monitoring target for Prometheus Operator. Requires Prometheus Operator to be installed in the cluster.",
       "type": "object",
       "properties": {
         "namespace": {
           "default": "",
+          "description": "Namespace to create the ServiceMonitor in. Defaults to the release namespace. Set this if your Prometheus operator watches a different namespace. Example: \"monitoring\"",
           "type": "string"
         },
         "interval": {
           "default": "30s",
+          "description": "How often Prometheus scrapes metrics from the default endpoint. Ignored when custom endpoints are defined. Example: \"15s\"",
           "type": "string"
         },
         "scrapeTimeout": {
           "default": "",
+          "description": "Timeout for each scrape request on the default endpoint. Must be less than interval. Leave empty for Prometheus default. Example: \"10s\"",
           "type": "string"
         },
         "endpoints": {
           "default": [],
+          "description": "Custom scrape endpoints. When set, replaces the default endpoint (http port, /metrics path). Use for applications exposing metrics on non-standard ports or paths. Example: [{ port: \"metrics\", path: \"/custom-metrics\", interval: \"15s\" }]",
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
               "port": {
-                "type": "string"
+                "type": "string",
+                "description": "Named port on the Service to scrape. Must match a port name from the Service. Example: \"metrics\""
               },
               "path": {
                 "default": "/metrics",
+                "description": "HTTP path to scrape for metrics. Example: \"/metrics\"",
                 "type": "string"
               },
               "interval": {
+                "description": "Override the scrape interval for this endpoint. Example: \"10s\"",
                 "type": "string"
               },
               "scrapeTimeout": {
+                "description": "Override the scrape timeout for this endpoint. Example: \"5s\"",
                 "type": "string"
               }
             },
@@ -1673,9 +1907,11 @@
         },
         "enabled": {
           "default": false,
+          "description": "Whether to create this resource. When false, the template is not rendered at all. Example: true",
           "type": "boolean"
         },
         "labels": {
+          "description": "Additional labels to add to the resource metadata. Merged with common.labels and standard Helm labels. Example: { team: \"backend\", tier: \"api\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -1685,6 +1921,7 @@
           }
         },
         "annotations": {
+          "description": "Additional annotations to add to the resource metadata. Merged with common.annotations. Useful for integrations like external-dns, cert-manager, etc. Example: { \"prometheus.io/scrape\": \"true\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -1706,13 +1943,16 @@
       "additionalProperties": false
     },
     "secret": {
+      "description": "Kubernetes Secret configuration. Stores sensitive data like passwords, tokens, and TLS certificates. Data is stored base64-encoded in etcd.",
       "type": "object",
       "properties": {
         "type": {
           "default": "Opaque",
+          "description": "Kubernetes Secret type. \"Opaque\" is the default for arbitrary data. \"kubernetes.io/tls\" for TLS certificates (expects tls.crt and tls.key). \"kubernetes.io/dockerconfigjson\" for Docker registry credentials. Example: \"kubernetes.io/tls\"",
           "type": "string"
         },
         "data": {
+          "description": "Base64-encoded secret data. Values must be base64 encoded. Example: { \"tls.crt\": \"LS0tLS1C...\", \"tls.key\": \"LS0tLS1C...\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -1722,6 +1962,7 @@
           }
         },
         "stringData": {
+          "description": "Plain-text secret data. Kubernetes base64-encodes these values automatically. Easier to use than data for simple string secrets. Example: { username: \"admin\", password: \"s3cret\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -1732,9 +1973,11 @@
         },
         "enabled": {
           "default": false,
+          "description": "Whether to create this resource. When false, the template is not rendered at all. Example: true",
           "type": "boolean"
         },
         "labels": {
+          "description": "Additional labels to add to the resource metadata. Merged with common.labels and standard Helm labels. Example: { team: \"backend\", tier: \"api\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -1744,6 +1987,7 @@
           }
         },
         "annotations": {
+          "description": "Additional annotations to add to the resource metadata. Merged with common.annotations. Useful for integrations like external-dns, cert-manager, etc. Example: { \"prometheus.io/scrape\": \"true\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -1764,12 +2008,14 @@
       "additionalProperties": false
     },
     "pvc": {
+      "description": "PersistentVolumeClaim configuration. Requests persistent storage from the cluster. Use for applications that need data to survive pod restarts (logs, uploads, cache).",
       "type": "object",
       "properties": {
         "accessModes": {
           "default": [
             "ReadWriteOnce"
           ],
+          "description": "How the volume can be mounted. \"ReadWriteOnce\" allows read-write by a single node. \"ReadOnlyMany\" allows read-only by multiple nodes. \"ReadWriteMany\" allows read-write by multiple nodes (requires a compatible StorageClass like NFS or EFS). Example: [\"ReadWriteOnce\"]",
           "type": "array",
           "items": {
             "type": "string"
@@ -1777,14 +2023,17 @@
         },
         "size": {
           "default": "8Gi",
+          "description": "Storage capacity to request. Example: \"50Gi\"",
           "type": "string"
         },
         "storageClassName": {
           "default": "",
+          "description": "StorageClass for dynamic volume provisioning. Leave empty to use the cluster default. Set to \"-\" to disable dynamic provisioning. Example: \"gp3\"",
           "type": "string"
         },
         "volumeMode": {
           "default": "Filesystem",
+          "description": "How the volume is consumed by the pod. \"Filesystem\" mounts as a directory (most common). \"Block\" mounts as a raw block device (for specialized workloads). Example: \"Filesystem\"",
           "type": "string",
           "enum": [
             "Filesystem",
@@ -1793,9 +2042,11 @@
         },
         "enabled": {
           "default": false,
+          "description": "Whether to create this resource. When false, the template is not rendered at all. Example: true",
           "type": "boolean"
         },
         "labels": {
+          "description": "Additional labels to add to the resource metadata. Merged with common.labels and standard Helm labels. Example: { team: \"backend\", tier: \"api\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -1805,6 +2056,7 @@
           }
         },
         "annotations": {
+          "description": "Additional annotations to add to the resource metadata. Merged with common.annotations. Useful for integrations like external-dns, cert-manager, etc. Example: { \"prometheus.io/scrape\": \"true\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -1826,21 +2078,26 @@
       "additionalProperties": false
     },
     "pdb": {
+      "description": "PodDisruptionBudget configuration. Limits how many pods can be down during voluntary disruptions (node drains, cluster upgrades). Set either minAvailable or maxUnavailable, not both.",
       "type": "object",
       "properties": {
         "minAvailable": {
           "default": 1,
+          "description": "Minimum number of pods that must remain available during voluntary disruptions. Can be an absolute number. Set to 0 to disable (when using maxUnavailable instead). Example: 2",
           "type": "number"
         },
         "maxUnavailable": {
           "default": "",
+          "description": "Maximum number of pods that can be unavailable during voluntary disruptions. Can be an absolute number or a percentage. Leave empty to use minAvailable instead. Example: \"25%\"",
           "type": "string"
         },
         "enabled": {
           "default": false,
+          "description": "Whether to create this resource. When false, the template is not rendered at all. Example: true",
           "type": "boolean"
         },
         "labels": {
+          "description": "Additional labels to add to the resource metadata. Merged with common.labels and standard Helm labels. Example: { team: \"backend\", tier: \"api\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -1850,6 +2107,7 @@
           }
         },
         "annotations": {
+          "description": "Additional annotations to add to the resource metadata. Merged with common.annotations. Useful for integrations like external-dns, cert-manager, etc. Example: { \"prometheus.io/scrape\": \"true\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -1869,12 +2127,14 @@
       "additionalProperties": false
     },
     "networkpolicy": {
+      "description": "NetworkPolicy configuration. Controls which pods and external IPs can communicate with your application. Requires a CNI plugin that supports NetworkPolicy (Calico, Cilium, etc.).",
       "type": "object",
       "properties": {
         "policyTypes": {
           "default": [
             "Ingress"
           ],
+          "description": "Which traffic directions to apply rules to. \"Ingress\" controls incoming traffic. \"Egress\" controls outgoing traffic. If a direction is listed but has no rules, all traffic in that direction is denied (unless allowExternal is true for Ingress). Example: [\"Ingress\", \"Egress\"]",
           "type": "array",
           "items": {
             "type": "string",
@@ -1886,10 +2146,12 @@
         },
         "allowExternal": {
           "default": true,
+          "description": "When true and no custom ingress rules are defined, allows all inbound traffic. When false with no custom rules, all inbound traffic is denied. Ignored when custom ingress rules are provided. Example: false",
           "type": "boolean"
         },
         "ingress": {
           "default": [],
+          "description": "Custom ingress (inbound) rules. When set, overrides allowExternal. Each entry defines a from selector and optional ports. Example: [{ from: [{ namespaceSelector: { matchLabels: { name: \"trusted\" } } }], ports: [{ port: 8080, protocol: \"TCP\" }] }]",
           "type": "array",
           "items": {
             "type": "object",
@@ -1901,6 +2163,7 @@
         },
         "egress": {
           "default": [],
+          "description": "Custom egress (outbound) rules. Each entry defines a to selector and optional ports. Example: [{ to: [{ ipBlock: { cidr: \"10.0.0.0/8\" } }], ports: [{ port: 443, protocol: \"TCP\" }] }]",
           "type": "array",
           "items": {
             "type": "object",
@@ -1912,9 +2175,11 @@
         },
         "enabled": {
           "default": false,
+          "description": "Whether to create this resource. When false, the template is not rendered at all. Example: true",
           "type": "boolean"
         },
         "labels": {
+          "description": "Additional labels to add to the resource metadata. Merged with common.labels and standard Helm labels. Example: { team: \"backend\", tier: \"api\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -1924,6 +2189,7 @@
           }
         },
         "annotations": {
+          "description": "Additional annotations to add to the resource metadata. Merged with common.annotations. Useful for integrations like external-dns, cert-manager, etc. Example: { \"prometheus.io/scrape\": \"true\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -1945,25 +2211,31 @@
       "additionalProperties": false
     },
     "hpa": {
+      "description": "HorizontalPodAutoscaler configuration. Automatically scales the number of pod replicas based on CPU/memory utilization. When enabled, the deployment replicas field is managed by the HPA.",
       "type": "object",
       "properties": {
         "minReplicas": {
           "default": 1,
+          "description": "Minimum number of replicas the HPA can scale down to. Set to at least 2 for high availability. Example: 2",
           "type": "number"
         },
         "maxReplicas": {
           "default": 3,
+          "description": "Maximum number of replicas the HPA can scale up to. Set based on your resource budget and expected peak load. Example: 10",
           "type": "number"
         },
         "targetCPU": {
           "default": 80,
+          "description": "Target average CPU utilization percentage across all pods. HPA scales up when utilization exceeds this threshold. Set to 0 to disable CPU-based scaling. Example: 70",
           "type": "number"
         },
         "targetMemory": {
           "default": 0,
+          "description": "Target average memory utilization percentage across all pods. HPA scales up when utilization exceeds this threshold. Set to 0 to disable memory-based scaling (default). Example: 80",
           "type": "number"
         },
         "behavior": {
+          "description": "Custom scaling behavior for scale-up and scale-down. Use to control scaling speed and stabilization windows. Example: { scaleDown: { stabilizationWindowSeconds: 300, policies: [{ type: \"Percent\", value: 10, periodSeconds: 60 }] } }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -1972,9 +2244,11 @@
         },
         "enabled": {
           "default": false,
+          "description": "Whether to create this resource. When false, the template is not rendered at all. Example: true",
           "type": "boolean"
         },
         "labels": {
+          "description": "Additional labels to add to the resource metadata. Merged with common.labels and standard Helm labels. Example: { team: \"backend\", tier: \"api\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -1984,6 +2258,7 @@
           }
         },
         "annotations": {
+          "description": "Additional annotations to add to the resource metadata. Merged with common.annotations. Useful for integrations like external-dns, cert-manager, etc. Example: { \"prometheus.io/scrape\": \"true\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -2006,13 +2281,16 @@
       "additionalProperties": false
     },
     "daemonset": {
+      "description": "DaemonSet workload configuration. Ensures a pod runs on every (or selected) node. Use for node-level agents like log collectors, monitoring, or network plugins. Only one of deployment, statefulset, or daemonset should be enabled.",
       "type": "object",
       "properties": {
         "updateStrategy": {
+          "description": "Strategy for rolling out updates to DaemonSet pods.",
           "type": "object",
           "properties": {
             "type": {
               "default": "RollingUpdate",
+              "description": "DaemonSet update strategy. \"RollingUpdate\" updates pods on each node automatically. \"OnDelete\" only updates pods when they are manually deleted. Example: \"OnDelete\"",
               "type": "string",
               "enum": [
                 "RollingUpdate",
@@ -2027,9 +2305,11 @@
         },
         "enabled": {
           "default": false,
+          "description": "Whether to create this resource. When false, the template is not rendered at all. Example: true",
           "type": "boolean"
         },
         "labels": {
+          "description": "Additional labels to add to the resource metadata. Merged with common.labels and standard Helm labels. Example: { team: \"backend\", tier: \"api\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -2039,6 +2319,7 @@
           }
         },
         "annotations": {
+          "description": "Additional annotations to add to the resource metadata. Merged with common.annotations. Useful for integrations like external-dns, cert-manager, etc. Example: { \"prometheus.io/scrape\": \"true\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -2057,9 +2338,11 @@
       "additionalProperties": false
     },
     "configmap": {
+      "description": "ConfigMap configuration. Stores non-sensitive configuration data as key-value pairs. Can be mounted as files or injected as environment variables.",
       "type": "object",
       "properties": {
         "data": {
+          "description": "Key-value pairs to store in the ConfigMap. Keys become filenames when mounted as a volume, or environment variable names when used with envFrom. Example: { \"config.yaml\": \"key: value\\nother: setting\", \"APP_ENV\": \"production\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -2070,9 +2353,11 @@
         },
         "enabled": {
           "default": false,
+          "description": "Whether to create this resource. When false, the template is not rendered at all. Example: true",
           "type": "boolean"
         },
         "labels": {
+          "description": "Additional labels to add to the resource metadata. Merged with common.labels and standard Helm labels. Example: { team: \"backend\", tier: \"api\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -2082,6 +2367,7 @@
           }
         },
         "annotations": {
+          "description": "Additional annotations to add to the resource metadata. Merged with common.annotations. Useful for integrations like external-dns, cert-manager, etc. Example: { \"prometheus.io/scrape\": \"true\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -2100,21 +2386,26 @@
       "additionalProperties": false
     },
     "certificate": {
+      "description": "cert-manager Certificate configuration. Automatically provisions and renews TLS certificates. Requires cert-manager to be installed in the cluster.",
       "type": "object",
       "properties": {
         "secretName": {
           "default": "",
+          "description": "Name of the Secret where the TLS certificate is stored. Defaults to <fullname>-tls. Example: \"my-app-tls\"",
           "type": "string"
         },
         "issuerRef": {
+          "description": "Reference to the cert-manager Issuer or ClusterIssuer that signs the certificate.",
           "type": "object",
           "properties": {
             "name": {
               "default": "",
+              "description": "Name of the cert-manager Issuer or ClusterIssuer to use. Example: \"letsencrypt-prod\"",
               "type": "string"
             },
             "kind": {
               "default": "ClusterIssuer",
+              "description": "Kind of the issuer. \"ClusterIssuer\" is cluster-scoped (shared across namespaces). \"Issuer\" is namespace-scoped. Example: \"ClusterIssuer\"",
               "type": "string",
               "enum": [
                 "Issuer",
@@ -2123,6 +2414,7 @@
             },
             "group": {
               "default": "cert-manager.io",
+              "description": "API group of the issuer. Default is \"cert-manager.io\" for standard cert-manager issuers. Example: \"cert-manager.io\"",
               "type": "string"
             }
           },
@@ -2135,6 +2427,7 @@
         },
         "dnsNames": {
           "default": [],
+          "description": "DNS names (Subject Alternative Names) to include in the certificate. The certificate is valid for all listed hostnames. Example: [\"myapp.example.com\", \"api.example.com\"]",
           "type": "array",
           "items": {
             "type": "string"
@@ -2142,17 +2435,21 @@
         },
         "duration": {
           "default": "",
+          "description": "How long the certificate is valid. Uses Go duration format. Leave empty for the issuer default (usually 90 days for Let's Encrypt). Example: \"2160h\" (90 days)",
           "type": "string"
         },
         "renewBefore": {
           "default": "",
+          "description": "How long before expiry to renew the certificate. Uses Go duration format. Leave empty for the issuer default. Example: \"360h\" (15 days before expiry)",
           "type": "string"
         },
         "enabled": {
           "default": false,
+          "description": "Whether to create this resource. When false, the template is not rendered at all. Example: true",
           "type": "boolean"
         },
         "labels": {
+          "description": "Additional labels to add to the resource metadata. Merged with common.labels and standard Helm labels. Example: { team: \"backend\", tier: \"api\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -2162,6 +2459,7 @@
           }
         },
         "annotations": {
+          "description": "Additional annotations to add to the resource metadata. Merged with common.annotations. Useful for integrations like external-dns, cert-manager, etc. Example: { \"prometheus.io/scrape\": \"true\" }",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -2185,6 +2483,7 @@
     },
     "extra": {
       "default": [],
+      "description": "List of raw YAML strings for additional Kubernetes resources not covered by this chart. Each string is rendered as a separate Kubernetes resource. Example: [\"apiVersion: v1\\nkind: ConfigMap\\nmetadata:\\n  name: extra-config\\ndata:\\n  key: value\"]",
       "type": "array",
       "items": {
         "type": "string"
