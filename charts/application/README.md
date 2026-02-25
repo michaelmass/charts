@@ -11,6 +11,145 @@ helm repo update
 helm install my-app michaelmass/application --namespace test
 ```
 
+## Examples
+
+### Basic Deployment with Service
+
+```yaml
+deployment:
+  enabled: true
+service:
+  enabled: true
+pod:
+  image:
+    repository: nginx
+    tag: latest
+```
+
+### StatefulSet with Persistent Volume
+
+```yaml
+statefulset:
+  enabled: true
+  replicas: 3
+  volumeClaimTemplates:
+    - name: data
+      size: 10Gi
+      storageClassName: standard
+service:
+  enabled: true
+pod:
+  image:
+    repository: postgres
+    tag: "16"
+```
+
+### DaemonSet
+
+```yaml
+daemonset:
+  enabled: true
+pod:
+  image:
+    repository: fluent/fluentd
+    tag: latest
+```
+
+### Deployment with Ingress and TLS
+
+```yaml
+deployment:
+  enabled: true
+service:
+  enabled: true
+ingress:
+  enabled: true
+  hostname: app.example.com
+  tls: true
+  ingressClassName: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+pod:
+  image:
+    repository: myapp
+    tag: v1.0.0
+```
+
+### Deployment with HPA and PDB
+
+```yaml
+deployment:
+  enabled: true
+service:
+  enabled: true
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPU: 70
+pdb:
+  enabled: true
+  minAvailable: 1
+pod:
+  image:
+    repository: myapp
+    tag: v1.0.0
+```
+
+### RBAC with ServiceAccount
+
+```yaml
+deployment:
+  enabled: true
+serviceaccount:
+  enabled: true
+  name: my-app-sa
+rbac:
+  enabled: true
+  role:
+    rules:
+      - apiGroups: [""]
+        resources: ["pods", "configmaps"]
+        verbs: ["get", "list", "watch"]
+pod:
+  image:
+    repository: myapp
+    tag: v1.0.0
+```
+
+### ConfigMap and Secret
+
+```yaml
+configmap:
+  enabled: true
+  data:
+    APP_ENV: production
+    LOG_LEVEL: info
+secret:
+  enabled: true
+  stringData:
+    DATABASE_URL: postgres://user:pass@host/db
+```
+
+### ServiceMonitor for Prometheus
+
+```yaml
+deployment:
+  enabled: true
+service:
+  enabled: true
+servicemonitor:
+  enabled: true
+  interval: 15s
+  endpoints:
+    - port: http
+      path: /metrics
+pod:
+  image:
+    repository: myapp
+    tag: v1.0.0
+```
+
 ## Testing
 
 [unittest](https://github.com/helm-unittest) is used to test the chart. To run the tests:

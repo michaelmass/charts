@@ -1,3 +1,30 @@
 {{- if .Values.networkpolicy.enabled }}
-{{- fail "not implemented yet" }}
+apiVersion: {{ include "common.capabilities.networkPolicy.apiVersion" . }}
+kind: NetworkPolicy
+metadata:
+  {{- $labels := include "common.tplvalues.merge" ( dict "values" ( list .Values.networkpolicy.labels .Values.common.labels ) "context" . ) }}
+  {{- $annotations := include "common.tplvalues.merge" ( dict "values" ( list .Values.networkpolicy.annotations .Values.common.annotations ) "context" . ) }}
+  name: {{ template "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" $labels "context" $ ) | nindent 4 }}
+  {{- if .Values.common.annotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  {{- $podLabels := include "common.tplvalues.merge" ( dict "values" ( list .Values.pod.labels .Values.common.labels ) "context" . ) }}
+  podSelector:
+    matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" $podLabels "context" $ ) | nindent 6 }}
+  policyTypes:
+    {{- range .Values.networkpolicy.policyTypes }}
+    - {{ . }}
+    {{- end }}
+  {{- if .Values.networkpolicy.ingress }}
+  ingress: {{- include "common.tplvalues.render" ( dict "value" .Values.networkpolicy.ingress "context" $ ) | nindent 4 }}
+  {{- else if and (has "Ingress" .Values.networkpolicy.policyTypes) .Values.networkpolicy.allowExternal }}
+  ingress:
+    - {}
+  {{- end }}
+  {{- if .Values.networkpolicy.egress }}
+  egress: {{- include "common.tplvalues.render" ( dict "value" .Values.networkpolicy.egress "context" $ ) | nindent 4 }}
+  {{- end }}
 {{- end }}

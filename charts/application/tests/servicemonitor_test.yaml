@@ -2,10 +2,115 @@ suite: test servicemonitor
 templates:
   - 'servicemonitor.yaml'
 tests:
-  - it: should fail with not implemented yet
+  - it: manifest should match snapshot
     set:
       servicemonitor:
         enabled: true
     asserts:
-      - failedTemplate:
-          errorMessage: 'not implemented yet'
+      - matchSnapshot: {}
+
+  - it: labels & annotations should be set
+    set:
+      common:
+        labels:
+          test_common: test
+        annotations:
+          test_common: test
+      servicemonitor:
+        enabled: true
+        labels:
+          test_sm: bar
+        annotations:
+          test_sm: bar
+    asserts:
+      - isKind:
+          of: ServiceMonitor
+      - isSubset:
+          path: metadata.labels
+          content:
+            test_common: test
+            test_sm: bar
+      - isSubset:
+          path: metadata.annotations
+          content:
+            test_common: test
+            test_sm: bar
+
+  - it: should set custom namespace
+    set:
+      servicemonitor:
+        enabled: true
+        namespace: monitoring
+    asserts:
+      - equal:
+          path: metadata.namespace
+          value: monitoring
+
+  - it: should render custom endpoints
+    set:
+      servicemonitor:
+        enabled: true
+        endpoints:
+          - port: metrics
+            path: /custom-metrics
+            interval: 15s
+    asserts:
+      - equal:
+          path: spec.endpoints[0].port
+          value: metrics
+      - equal:
+          path: spec.endpoints[0].path
+          value: /custom-metrics
+
+  - it: should not render when disabled
+    set:
+      servicemonitor:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should render default endpoint when no custom endpoints
+    set:
+      servicemonitor:
+        enabled: true
+        interval: 30s
+    asserts:
+      - equal:
+          path: spec.endpoints[0].port
+          value: http
+      - equal:
+          path: spec.endpoints[0].path
+          value: /metrics
+      - equal:
+          path: spec.endpoints[0].interval
+          value: 30s
+
+  - it: should set scrapeTimeout on default endpoint
+    set:
+      servicemonitor:
+        enabled: true
+        scrapeTimeout: 10s
+    asserts:
+      - equal:
+          path: spec.endpoints[0].scrapeTimeout
+          value: 10s
+
+  - it: should have selector matching standard pod labels
+    set:
+      servicemonitor:
+        enabled: true
+    asserts:
+      - isSubset:
+          path: spec.selector.matchLabels
+          content:
+            app.kubernetes.io/instance: RELEASE-NAME
+            app.kubernetes.io/name: application
+
+  - it: should have namespaceSelector
+    set:
+      servicemonitor:
+        enabled: true
+    asserts:
+      - isNotNull:
+          path: spec.namespaceSelector.matchNames

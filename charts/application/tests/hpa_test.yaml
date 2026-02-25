@@ -2,10 +2,160 @@ suite: test hpa
 templates:
   - 'hpa.yaml'
 tests:
-  - it: should fail with not implemented yet
+  - it: manifest should match snapshot
     set:
       hpa:
         enabled: true
     asserts:
-      - failedTemplate:
-          errorMessage: 'not implemented yet'
+      - matchSnapshot: {}
+
+  - it: labels & annotations should be set
+    set:
+      common:
+        labels:
+          test_common: test
+        annotations:
+          test_common: test
+      hpa:
+        enabled: true
+        labels:
+          test_hpa: bar
+        annotations:
+          test_hpa: bar
+    asserts:
+      - isKind:
+          of: HorizontalPodAutoscaler
+      - isSubset:
+          path: metadata.labels
+          content:
+            test_common: test
+            test_hpa: bar
+      - isSubset:
+          path: metadata.annotations
+          content:
+            test_common: test
+            test_hpa: bar
+
+  - it: should set min and max replicas
+    set:
+      hpa:
+        enabled: true
+        minReplicas: 2
+        maxReplicas: 10
+    asserts:
+      - equal:
+          path: spec.minReplicas
+          value: 2
+      - equal:
+          path: spec.maxReplicas
+          value: 10
+
+  - it: should set CPU target
+    set:
+      hpa:
+        enabled: true
+        targetCPU: 70
+    asserts:
+      - equal:
+          path: spec.metrics[0].resource.name
+          value: cpu
+      - equal:
+          path: spec.metrics[0].resource.target.averageUtilization
+          value: 70
+
+  - it: should not render when disabled
+    set:
+      hpa:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should set both CPU and memory targets
+    set:
+      hpa:
+        enabled: true
+        targetCPU: 70
+        targetMemory: 80
+    asserts:
+      - equal:
+          path: spec.metrics[0].resource.name
+          value: cpu
+      - equal:
+          path: spec.metrics[1].resource.name
+          value: memory
+      - equal:
+          path: spec.metrics[1].resource.target.averageUtilization
+          value: 80
+
+  - it: should not render memory metric when targetMemory is 0
+    set:
+      hpa:
+        enabled: true
+        targetCPU: 80
+        targetMemory: 0
+    asserts:
+      - lengthEqual:
+          path: spec.metrics
+          count: 1
+
+  - it: should not render CPU metric when targetCPU is 0
+    set:
+      hpa:
+        enabled: true
+        targetCPU: 0
+        targetMemory: 80
+    asserts:
+      - equal:
+          path: spec.metrics[0].resource.name
+          value: memory
+      - lengthEqual:
+          path: spec.metrics
+          count: 1
+
+  - it: should render custom behavior
+    set:
+      hpa:
+        enabled: true
+        behavior:
+          scaleDown:
+            stabilizationWindowSeconds: 300
+            policies:
+              - type: Percent
+                value: 10
+                periodSeconds: 60
+    asserts:
+      - equal:
+          path: spec.behavior.scaleDown.stabilizationWindowSeconds
+          value: 300
+
+  - it: should not render behavior when not set
+    set:
+      hpa:
+        enabled: true
+        behavior: {}
+    asserts:
+      - isNull:
+          path: spec.behavior
+
+  - it: should reference Deployment in scaleTargetRef
+    set:
+      hpa:
+        enabled: true
+    asserts:
+      - equal:
+          path: spec.scaleTargetRef.kind
+          value: Deployment
+
+  - it: should use fullnameOverride in scaleTargetRef
+    set:
+      fullnameOverride: my-app
+      hpa:
+        enabled: true
+    asserts:
+      - equal:
+          path: spec.scaleTargetRef.name
+          value: my-app
+      - equal:
+          path: metadata.name
+          value: my-app

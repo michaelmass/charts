@@ -2,10 +2,92 @@ suite: test configmap
 templates:
   - 'configmap.yaml'
 tests:
-  - it: should fail with not implemented yet
+  - it: manifest should match snapshot
     set:
       configmap:
         enabled: true
+        data:
+          key1: value1
     asserts:
-      - failedTemplate:
-          errorMessage: 'not implemented yet'
+      - matchSnapshot: {}
+
+  - it: labels & annotations should be set
+    set:
+      common:
+        labels:
+          test_common: test
+        annotations:
+          test_common: test
+      configmap:
+        enabled: true
+        labels:
+          test_configmap: bar
+        annotations:
+          test_configmap: bar
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - isSubset:
+          path: metadata.labels
+          content:
+            test_common: test
+            test_configmap: bar
+      - isSubset:
+          path: metadata.annotations
+          content:
+            test_common: test
+            test_configmap: bar
+
+  - it: should render data
+    set:
+      configmap:
+        enabled: true
+        data:
+          app.conf: |
+            setting=true
+          db.conf: |
+            host=localhost
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - isNotNull:
+          path: data
+
+  - it: should not render when disabled
+    set:
+      configmap:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should use fullnameOverride in metadata
+    set:
+      fullnameOverride: my-cm
+      configmap:
+        enabled: true
+    asserts:
+      - equal:
+          path: metadata.name
+          value: my-cm
+
+  - it: should use namespaceOverride in metadata
+    set:
+      namespaceOverride: custom-ns
+      configmap:
+        enabled: true
+    asserts:
+      - equal:
+          path: metadata.namespace
+          value: custom-ns
+
+  - it: should not render data section when data is empty
+    set:
+      configmap:
+        enabled: true
+        data: {}
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - isNull:
+          path: data

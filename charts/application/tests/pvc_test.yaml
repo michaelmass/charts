@@ -2,10 +2,122 @@ suite: test pvc
 templates:
   - 'pvc.yaml'
 tests:
-  - it: should fail with not implemented yet
+  - it: manifest should match snapshot
     set:
       pvc:
         enabled: true
     asserts:
-      - failedTemplate:
-          errorMessage: 'not implemented yet'
+      - matchSnapshot: {}
+
+  - it: labels & annotations should be set
+    set:
+      common:
+        labels:
+          test_common: test
+        annotations:
+          test_common: test
+      pvc:
+        enabled: true
+        labels:
+          test_pvc: bar
+        annotations:
+          test_pvc: bar
+    asserts:
+      - isKind:
+          of: PersistentVolumeClaim
+      - isSubset:
+          path: metadata.labels
+          content:
+            test_common: test
+            test_pvc: bar
+      - isSubset:
+          path: metadata.annotations
+          content:
+            test_common: test
+            test_pvc: bar
+
+  - it: should set access modes and size
+    set:
+      pvc:
+        enabled: true
+        accessModes:
+          - ReadWriteMany
+        size: 50Gi
+    asserts:
+      - contains:
+          path: spec.accessModes
+          content: ReadWriteMany
+      - equal:
+          path: spec.resources.requests.storage
+          value: 50Gi
+
+  - it: should set storage class
+    set:
+      pvc:
+        enabled: true
+        storageClassName: fast-ssd
+    asserts:
+      - equal:
+          path: spec.storageClassName
+          value: fast-ssd
+
+  - it: should not render when disabled
+    set:
+      pvc:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should set volumeMode
+    set:
+      pvc:
+        enabled: true
+        volumeMode: Block
+    asserts:
+      - equal:
+          path: spec.volumeMode
+          value: Block
+
+  - it: should default volumeMode to Filesystem
+    set:
+      pvc:
+        enabled: true
+    asserts:
+      - equal:
+          path: spec.volumeMode
+          value: Filesystem
+
+  - it: should set multiple accessModes
+    set:
+      pvc:
+        enabled: true
+        accessModes:
+          - ReadWriteOnce
+          - ReadOnlyMany
+    asserts:
+      - contains:
+          path: spec.accessModes
+          content: ReadWriteOnce
+      - contains:
+          path: spec.accessModes
+          content: ReadOnlyMany
+
+  - it: should not render storageClassName when not set
+    set:
+      pvc:
+        enabled: true
+        storageClassName: ""
+    asserts:
+      - isNull:
+          path: spec.storageClassName
+
+  - it: should use fullnameOverride in metadata
+    set:
+      fullnameOverride: my-pvc
+      pvc:
+        enabled: true
+    asserts:
+      - equal:
+          path: metadata.name
+          value: my-pvc

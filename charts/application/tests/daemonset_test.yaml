@@ -2,10 +2,178 @@ suite: test daemonset
 templates:
   - 'daemonset.yaml'
 tests:
-  - it: should fail with not implemented yet
+  - it: manifest should match snapshot
     set:
       daemonset:
         enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
     asserts:
-      - failedTemplate:
-          errorMessage: 'not implemented yet'
+      - matchSnapshot: {}
+
+  - it: labels & annotations should be set
+    set:
+      common:
+        labels:
+          test_common: test
+        annotations:
+          test_common: test
+      daemonset:
+        enabled: true
+        labels:
+          test_ds: bar
+        annotations:
+          test_ds: bar
+      pod:
+        image:
+          repository: example
+          tag: latest
+        labels:
+          test_pod: foo
+        annotations:
+          test_pod: foo
+    asserts:
+      - isKind:
+          of: DaemonSet
+      - isSubset:
+          path: metadata.labels
+          content:
+            test_common: test
+            test_ds: bar
+      - isSubset:
+          path: metadata.annotations
+          content:
+            test_common: test
+            test_ds: bar
+      - isSubset:
+          path: spec.template.metadata.labels
+          content:
+            test_common: test
+            test_pod: foo
+      - isSubset:
+          path: spec.template.metadata.annotations
+          content:
+            test_common: test
+            test_pod: foo
+
+  - it: should set update strategy
+    set:
+      daemonset:
+        enabled: true
+        updateStrategy:
+          type: OnDelete
+      pod:
+        image:
+          repository: example
+          tag: latest
+    asserts:
+      - equal:
+          path: spec.updateStrategy.type
+          value: OnDelete
+
+  - it: should not render when disabled
+    set:
+      daemonset:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should use fullnameOverride in metadata
+    set:
+      fullnameOverride: my-ds
+      daemonset:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+    asserts:
+      - equal:
+          path: metadata.name
+          value: my-ds
+
+  - it: should render pod spec with env vars and ports
+    set:
+      daemonset:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+        containerPorts:
+          http: 9100
+        env:
+          vars:
+            - name: LOG_LEVEL
+              value: debug
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].ports[0].containerPort
+          value: 9100
+      - equal:
+          path: spec.template.spec.containers[0].env[0].name
+          value: LOG_LEVEL
+      - equal:
+          path: spec.template.spec.containers[0].env[0].value
+          value: debug
+
+  - it: should render init containers
+    set:
+      daemonset:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+        initContainers:
+          - name: init
+            image: busybox:latest
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: init
+
+  - it: should set tolerations
+    set:
+      daemonset:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+        tolerations:
+          - operator: Exists
+    asserts:
+      - equal:
+          path: spec.template.spec.tolerations[0].operator
+          value: Exists
+
+  - it: should set nodeSelector
+    set:
+      daemonset:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+        nodeSelector:
+          role: monitoring
+    asserts:
+      - equal:
+          path: spec.template.spec.nodeSelector.role
+          value: monitoring
+
+  - it: should not have replicas field
+    set:
+      daemonset:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+    asserts:
+      - isNull:
+          path: spec.replicas

@@ -2,10 +2,145 @@ suite: test vpa
 templates:
   - 'vpa.yaml'
 tests:
-  - it: should fail with not implemented yet
+  - it: manifest should match snapshot
     set:
       vpa:
         enabled: true
     asserts:
-      - failedTemplate:
-          errorMessage: 'not implemented yet'
+      - matchSnapshot: {}
+
+  - it: labels & annotations should be set
+    set:
+      common:
+        labels:
+          test_common: test
+        annotations:
+          test_common: test
+      vpa:
+        enabled: true
+        labels:
+          test_vpa: bar
+        annotations:
+          test_vpa: bar
+    asserts:
+      - isKind:
+          of: VerticalPodAutoscaler
+      - isSubset:
+          path: metadata.labels
+          content:
+            test_common: test
+            test_vpa: bar
+      - isSubset:
+          path: metadata.annotations
+          content:
+            test_common: test
+            test_vpa: bar
+
+  - it: should set updateMode
+    set:
+      vpa:
+        enabled: true
+        updateMode: "Off"
+    asserts:
+      - equal:
+          path: spec.updatePolicy.updateMode
+          value: "Off"
+
+  - it: should set resource policy
+    set:
+      vpa:
+        enabled: true
+        controlledResources:
+          - cpu
+          - memory
+        minAllowed:
+          cpu: 100m
+          memory: 128Mi
+        maxAllowed:
+          cpu: "2"
+          memory: 2Gi
+    asserts:
+      - isNotNull:
+          path: spec.resourcePolicy
+
+  - it: should not render when disabled
+    set:
+      vpa:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should set resource policy controlledResources values
+    set:
+      vpa:
+        enabled: true
+        controlledResources:
+          - cpu
+    asserts:
+      - contains:
+          path: spec.resourcePolicy.containerPolicies[0].controlledResources
+          content: cpu
+
+  - it: should set resource policy minAllowed values
+    set:
+      vpa:
+        enabled: true
+        minAllowed:
+          cpu: 200m
+          memory: 256Mi
+    asserts:
+      - equal:
+          path: spec.resourcePolicy.containerPolicies[0].minAllowed.cpu
+          value: 200m
+      - equal:
+          path: spec.resourcePolicy.containerPolicies[0].minAllowed.memory
+          value: 256Mi
+
+  - it: should set resource policy maxAllowed values
+    set:
+      vpa:
+        enabled: true
+        maxAllowed:
+          cpu: "4"
+          memory: 4Gi
+    asserts:
+      - equal:
+          path: spec.resourcePolicy.containerPolicies[0].maxAllowed.cpu
+          value: "4"
+      - equal:
+          path: spec.resourcePolicy.containerPolicies[0].maxAllowed.memory
+          value: 4Gi
+
+  - it: should not render resourcePolicy when no constraints set
+    set:
+      vpa:
+        enabled: true
+        controlledResources: []
+        minAllowed: {}
+        maxAllowed: {}
+    asserts:
+      - isNull:
+          path: spec.resourcePolicy
+
+  - it: should reference Deployment in targetRef
+    set:
+      vpa:
+        enabled: true
+    asserts:
+      - equal:
+          path: spec.targetRef.kind
+          value: Deployment
+
+  - it: should use fullnameOverride in targetRef and metadata
+    set:
+      fullnameOverride: my-app
+      vpa:
+        enabled: true
+    asserts:
+      - equal:
+          path: metadata.name
+          value: my-app
+      - equal:
+          path: spec.targetRef.name
+          value: my-app

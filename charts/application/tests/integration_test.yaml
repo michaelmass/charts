@@ -1,0 +1,285 @@
+suite: workload exclusivity
+templates:
+  - deployment.yaml
+  - statefulset.yaml
+  - daemonset.yaml
+tests:
+  - it: should only render deployment when only deployment is enabled
+    set:
+      deployment:
+        enabled: true
+      statefulset:
+        enabled: false
+      daemonset:
+        enabled: false
+      pod:
+        image:
+          repository: example
+          tag: latest
+    asserts:
+      - hasDocuments:
+          count: 1
+        template: deployment.yaml
+      - hasDocuments:
+          count: 0
+        template: statefulset.yaml
+      - hasDocuments:
+          count: 0
+        template: daemonset.yaml
+
+  - it: should only render statefulset when only statefulset is enabled
+    set:
+      deployment:
+        enabled: false
+      statefulset:
+        enabled: true
+      daemonset:
+        enabled: false
+      pod:
+        image:
+          repository: example
+          tag: latest
+    asserts:
+      - hasDocuments:
+          count: 0
+        template: deployment.yaml
+      - hasDocuments:
+          count: 1
+        template: statefulset.yaml
+      - hasDocuments:
+          count: 0
+        template: daemonset.yaml
+
+  - it: should only render daemonset when only daemonset is enabled
+    set:
+      deployment:
+        enabled: false
+      statefulset:
+        enabled: false
+      daemonset:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+    asserts:
+      - hasDocuments:
+          count: 0
+        template: deployment.yaml
+      - hasDocuments:
+          count: 0
+        template: statefulset.yaml
+      - hasDocuments:
+          count: 1
+        template: daemonset.yaml
+
+  - it: should render no workloads when all disabled
+    set:
+      deployment:
+        enabled: false
+      statefulset:
+        enabled: false
+      daemonset:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+        template: deployment.yaml
+      - hasDocuments:
+          count: 0
+        template: statefulset.yaml
+      - hasDocuments:
+          count: 0
+        template: daemonset.yaml
+
+---
+suite: fullname consistency
+templates:
+  - deployment.yaml
+  - service.yaml
+tests:
+  - it: should use fullnameOverride in deployment
+    set:
+      fullnameOverride: my-app
+      deployment:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+    asserts:
+      - equal:
+          path: metadata.name
+          value: my-app
+        template: deployment.yaml
+
+  - it: should use fullnameOverride in service
+    set:
+      fullnameOverride: my-app
+      service:
+        enabled: true
+    asserts:
+      - equal:
+          path: metadata.name
+          value: my-app
+        template: service.yaml
+
+  - it: should use namespaceOverride in deployment
+    set:
+      namespaceOverride: custom-ns
+      deployment:
+        enabled: true
+      pod:
+        image:
+          repository: example
+          tag: latest
+    asserts:
+      - equal:
+          path: metadata.namespace
+          value: custom-ns
+        template: deployment.yaml
+
+  - it: should use namespaceOverride in service
+    set:
+      namespaceOverride: custom-ns
+      service:
+        enabled: true
+    asserts:
+      - equal:
+          path: metadata.namespace
+          value: custom-ns
+        template: service.yaml
+
+---
+suite: rbac resources
+templates:
+  - role.yaml
+  - rolebinding.yaml
+  - clusterrolebinding.yaml
+tests:
+  - it: should render all rbac resources when enabled
+    set:
+      rbac:
+        enabled: true
+        role:
+          rules:
+            - apiGroups: [""]
+              resources: ["pods"]
+              verbs: ["get"]
+    asserts:
+      - hasDocuments:
+          count: 1
+        template: role.yaml
+      - hasDocuments:
+          count: 1
+        template: rolebinding.yaml
+      - hasDocuments:
+          count: 1
+        template: clusterrolebinding.yaml
+
+  - it: should render no rbac resources when disabled
+    set:
+      rbac:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+        template: role.yaml
+      - hasDocuments:
+          count: 0
+        template: rolebinding.yaml
+      - hasDocuments:
+          count: 0
+        template: clusterrolebinding.yaml
+
+  - it: should use same fullnameOverride across rbac resources
+    set:
+      fullnameOverride: my-app
+      rbac:
+        enabled: true
+    asserts:
+      - equal:
+          path: metadata.name
+          value: my-app
+        template: role.yaml
+      - equal:
+          path: metadata.name
+          value: my-app
+        template: rolebinding.yaml
+      - equal:
+          path: metadata.name
+          value: my-app
+        template: clusterrolebinding.yaml
+
+  - it: should reference same serviceaccount in bindings
+    set:
+      rbac:
+        enabled: true
+      serviceaccount:
+        name: my-sa
+    asserts:
+      - equal:
+          path: subjects[0].name
+          value: my-sa
+        template: rolebinding.yaml
+      - equal:
+          path: subjects[0].name
+          value: my-sa
+        template: clusterrolebinding.yaml
+
+---
+suite: deployment with service
+templates:
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
+tests:
+  - it: should render deployment and service together
+    set:
+      deployment:
+        enabled: true
+      service:
+        enabled: true
+        ports:
+          http: 80
+      pod:
+        image:
+          repository: example
+          tag: latest
+        containerPorts:
+          http: 8080
+    asserts:
+      - hasDocuments:
+          count: 1
+        template: deployment.yaml
+      - hasDocuments:
+          count: 1
+        template: service.yaml
+      - hasDocuments:
+          count: 0
+        template: ingress.yaml
+
+  - it: should render full web stack with ingress
+    set:
+      deployment:
+        enabled: true
+      service:
+        enabled: true
+      ingress:
+        enabled: true
+        hostname: app.local
+        ingressClassName: nginx
+      pod:
+        image:
+          repository: example
+          tag: latest
+    asserts:
+      - hasDocuments:
+          count: 1
+        template: deployment.yaml
+      - hasDocuments:
+          count: 1
+        template: service.yaml
+      - hasDocuments:
+          count: 1
+        template: ingress.yaml

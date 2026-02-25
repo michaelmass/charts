@@ -3,3 +3,51 @@ CHART VERSION: {{ .Chart.Version }}
 APP VERSION: {{ .Chart.AppVersion }}
 
 ** Please be patient while the chart is being deployed **
+
+{{- if .Values.ingress.enabled }}
+
+Access your application via:
+
+  http{{ if .Values.ingress.tls }}s{{ end }}://{{ .Values.ingress.hostname }}{{ .Values.ingress.path }}
+
+{{- else if .Values.service.enabled }}
+
+Get the application URL by running these commands:
+
+{{- if eq .Values.service.type "LoadBalancer" }}
+
+  NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+  Watch the status with: kubectl get svc --namespace {{ include "common.names.namespace" . }} -w {{ include "common.names.fullname" . }}
+
+  export SERVICE_IP=$(kubectl get svc --namespace {{ include "common.names.namespace" . }} {{ include "common.names.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+  echo "Application URL: http://$SERVICE_IP:{{ .Values.service.ports.http }}"
+
+{{- else if eq .Values.service.type "NodePort" }}
+
+  export NODE_PORT=$(kubectl get --namespace {{ include "common.names.namespace" . }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "common.names.fullname" . }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ include "common.names.namespace" . }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo "Application URL: http://$NODE_IP:$NODE_PORT"
+
+{{- else }}
+
+  kubectl port-forward --namespace {{ include "common.names.namespace" . }} svc/{{ include "common.names.fullname" . }} {{ .Values.service.ports.http }}:{{ .Values.service.ports.http }}
+  echo "Application URL: http://127.0.0.1:{{ .Values.service.ports.http }}"
+
+{{- end }}
+{{- end }}
+
+{{- if .Values.statefulset.enabled }}
+
+Check StatefulSet status:
+
+  kubectl get statefulset --namespace {{ include "common.names.namespace" . }} {{ include "common.names.fullname" . }}
+
+{{- end }}
+
+{{- if .Values.daemonset.enabled }}
+
+Check DaemonSet status:
+
+  kubectl get daemonset --namespace {{ include "common.names.namespace" . }} {{ include "common.names.fullname" . }}
+
+{{- end }}

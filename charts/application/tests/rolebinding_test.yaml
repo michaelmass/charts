@@ -1,6 +1,6 @@
-suite: test clusterrolebinding
+suite: test rolebinding
 templates:
-  - clusterrolebinding.yaml
+  - rolebinding.yaml
 tests:
   - it: manifest should match snapshot
     set:
@@ -18,35 +18,36 @@ tests:
           test_common: test
       rbac:
         enabled: true
-        clusterrolebinding:
+        rolebinding:
           labels:
-            test_crb: bar
+            test_rb: bar
           annotations:
-            test_crb: bar
+            test_rb: bar
     asserts:
       - isKind:
-          of: ClusterRoleBinding
+          of: RoleBinding
       - isSubset:
           path: metadata.labels
           content:
             test_common: test
-            test_crb: bar
+            test_rb: bar
       - isSubset:
           path: metadata.annotations
           content:
             test_common: test
-            test_crb: bar
+            test_rb: bar
 
   - it: should use custom role name
     set:
       rbac:
         enabled: true
-        clusterrolebinding:
-          roleName: my-cluster-role
+        rolebinding:
+          roleName: my-custom-role
+          roleKind: ClusterRole
     asserts:
       - equal:
           path: roleRef.name
-          value: my-cluster-role
+          value: my-custom-role
       - equal:
           path: roleRef.kind
           value: ClusterRole
@@ -64,21 +65,21 @@ tests:
       fullnameOverride: my-app
       rbac:
         enabled: true
-        clusterrolebinding:
+        rolebinding:
           roleName: ""
     asserts:
       - equal:
           path: roleRef.name
           value: my-app
 
-  - it: should default roleKind to ClusterRole
+  - it: should default roleKind to Role
     set:
       rbac:
         enabled: true
     asserts:
       - equal:
           path: roleRef.kind
-          value: ClusterRole
+          value: Role
 
   - it: should reference ServiceAccount in subjects
     set:

@@ -1,10 +1,11 @@
+# This file is auto-generated from values.ts. Do not edit directly.
 global:
-  imageRegistry: ''
-  storageClass: ''
+  imageRegistry: ""
+  storageClass: ""
   imagePullSecrets: []
-nameOverride: ''
-fullnameOverride: ''
-namespaceOverride: ''
+nameOverride: ""
+fullnameOverride: ""
+namespaceOverride: ""
 common:
   labels: {}
   annotations: {}
@@ -16,8 +17,8 @@ deployment:
   labels: {}
   annotations: {}
 pod:
-  priorityClassName: ''
-  schedulerName: ''
+  priorityClassName: ""
+  schedulerName: ""
   terminationGracePeriodSeconds: 0
   command: []
   args: []
@@ -25,8 +26,8 @@ pod:
     http: 8080
   env:
     vars: []
-    configmap: ''
-    secret: ''
+    configmap: ""
+    secret: ""
   probes:
     startup:
       enabled: false
@@ -60,21 +61,27 @@ pod:
         port: http
   image:
     registry: docker.io
-    repository: ''
-    tag: ''
-    digest: ''
+    repository: ""
+    tag: ""
+    digest: ""
     pullPolicy: IfNotPresent
     pullSecrets: []
   resourcesPreset: none
-  resources: {}
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
   initContainers: []
   sidecars: []
   affinity: {}
-  affinityPreset: ''
+  affinityPreset: ""
   antiAffinityPreset: soft
   nodeAffinityPreset:
-    type: ''
-    key: ''
+    type: ""
+    key: ""
     values: []
   nodeSelector: {}
   tolerations: []
@@ -87,11 +94,10 @@ pod:
     fsGroup: 1001
   containerSecurityContext:
     enabled: true
-    seLinuxOptions: null
     runAsUser: 1001
     runAsNonRoot: true
     privileged: false
-    readOnlyRootFilesystem: false
+    readOnlyRootFilesystem: true
     allowPrivilegeEscalation: false
     capabilities:
       drop:
@@ -107,11 +113,11 @@ service:
     http: 80
     https: 443
   nodePorts:
-    http: ''
-    https: ''
+    http: ""
+    https: ""
   protocol: TCP
-  clusterIP: ''
-  loadBalancerIP: ''
+  clusterIP: ""
+  loadBalancerIP: ""
   externalTrafficPolicy: Cluster
   sessionAffinity: None
   loadBalancerSourceRanges: []
@@ -121,70 +127,129 @@ service:
   labels: {}
   annotations: {}
 ingress:
-  apiVersion: ''
+  apiVersion: ""
   hostname: application.local
   pathType: ImplementationSpecific
   path: /
   tls: false
-  existingSecretName: ''
-  ingressClassName: ''
+  existingSecretName: ""
+  ingressClassName: ""
   extraPaths: []
   extraHosts: []
   extraTls: []
+  extraRules: []
+  selfSigned: false
   enabled: false
   labels: {}
   annotations: {}
 serviceaccount:
-  name: ''
+  name: ""
   automountServiceAccountToken: false
   enabled: false
   labels: {}
   annotations: {}
 rbac:
   enabled: false
+  role:
+    rules: []
+    labels: {}
+    annotations: {}
+  rolebinding:
+    roleName: ""
+    roleKind: Role
+    labels: {}
+    annotations: {}
+  clusterrolebinding:
+    roleName: ""
+    roleKind: ClusterRole
+    labels: {}
+    annotations: {}
 vpa:
+  updateMode: Auto
+  controlledResources: []
+  minAllowed: {}
+  maxAllowed: {}
   enabled: false
   labels: {}
   annotations: {}
 statefulset:
+  replicas: 1
+  serviceName: ""
+  podManagementPolicy: OrderedReady
+  updateStrategy:
+    type: RollingUpdate
+  volumeClaimTemplates: []
   enabled: false
   labels: {}
   annotations: {}
 servicemonitor:
+  namespace: ""
+  interval: 30s
+  scrapeTimeout: ""
+  endpoints: []
   enabled: false
   labels: {}
   annotations: {}
 secret:
+  type: Opaque
+  data: {}
+  stringData: {}
   enabled: false
   labels: {}
   annotations: {}
 pvc:
+  accessModes:
+    - ReadWriteOnce
+  size: 8Gi
+  storageClassName: ""
+  volumeMode: Filesystem
   enabled: false
   labels: {}
   annotations: {}
 pdb:
   minAvailable: 1
-  maxUnavailable: ''
+  maxUnavailable: ""
   enabled: false
   labels: {}
   annotations: {}
 networkpolicy:
+  policyTypes:
+    - Ingress
+  allowExternal: true
+  ingress: []
+  egress: []
   enabled: false
   labels: {}
   annotations: {}
 hpa:
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPU: 80
+  targetMemory: 0
+  behavior: {}
   enabled: false
   labels: {}
   annotations: {}
 daemonset:
+  updateStrategy:
+    type: RollingUpdate
   enabled: false
   labels: {}
   annotations: {}
 configmap:
+  data: {}
   enabled: false
   labels: {}
   annotations: {}
 certificate:
+  secretName: ""
+  issuerRef:
+    name: ""
+    kind: ClusterIssuer
+    group: cert-manager.io
+  dnsNames: []
+  duration: ""
+  renewBefore: ""
   enabled: false
   labels: {}
   annotations: {}

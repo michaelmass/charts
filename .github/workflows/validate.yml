@@ -1,0 +1,41 @@
+name: Validate Charts
+
+on:
+  pull_request:
+    branches: ['master']
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+      - name: Install Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Validate schema is up to date
+        run: |
+          cd charts/application
+          deno run --no-config --no-lock --node-modules-dir=false -A values.ts
+          git diff --exit-code values.yaml values.schema.json
+      - name: Helm Lint
+        run: helm lint charts/application
+      - name: Install helm-unittest
+        run: helm plugin install --verify=false https://github.com/helm-unittest/helm-unittest.git
+      - name: Helm Unit Tests
+        run: helm unittest charts/application
+      - name: Helm Template Dry-Run
+        run: |
+          helm template test charts/application \
+            --set deployment.enabled=true \
+            --set pod.image.repository=nginx \
+            --set pod.image.tag=latest \
+            --set service.enabled=true
+      - name: Trivy Security Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: config
+          scan-ref: charts/application/templates
+          exit-code: 0
